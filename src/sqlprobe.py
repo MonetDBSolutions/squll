@@ -26,7 +26,7 @@ from postgres_driver import PostgresDriver
 from sqlite_driver import SqliteDriver
 
 parser = argparse.ArgumentParser(
-    description=' The SQLprobe is the experiment driver for SQLscalpel. '
+    description='SQLprobe is the experiment driver for SQLscalpel. '
                 'It should be started on each machine you want to experiment with. '
                 'The details of running the experiment script can be kept private. '
                 'However, the database/query text is provided by the server and the results '
@@ -37,16 +37,13 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--config', type=str, help='Configuration file to use', default='sqlprobe.conf')
 parser.add_argument('--target', type=str, help='Target system to use', default='DEFAULT')
-
-# control parameters for the probe program
-parser.add_argument('--noexec',  help='Disable experiment runs ', action='store_true')
 parser.add_argument('--version', help='Show version info', action='store_true')
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
     if args.version:
-        print('SQLprobe Version 0.01')
+        print('SQLprobe Version 0.1')
 
     # the configuration file is consider local
     config = configparser.ConfigParser()
@@ -62,7 +59,7 @@ if __name__ == '__main__':
         exit(-1)
     focus = config[args.target]
 
-    if args.noexec or args.target == 'DEFAULT':
+    if args.target == 'DEFAULT':
         print('CONFIG SECTIONS', config.sections())
         print('CONFIG TARGET', args.target)
         exit(0)
@@ -79,17 +76,17 @@ if __name__ == '__main__':
     conn = Connection(focus)
 
     dblist = focus['db'].split(',').copy()
+    if len(dblist) > 1:
+        print('Databases:', dblist)
     xlist = focus['experiment'].split(',').copy()
-    print(dblist)
+    if len(xlist) > 1:
+        print('Experiments:', xlist)
+
     doit = True
     delay = 5
-    olist = dblist.copy()
-    repeat = int(focus['repeat'])
-    timeout = int(focus['timeout'])
-    debug = focus['debug']
+
     while doit:
-        cnt = 0
-        dblist = olist.copy()
+        doit = False
         for db in dblist:
             focus['db'] = db
             for x in xlist:
@@ -97,25 +94,17 @@ if __name__ == '__main__':
                 tasks = conn.get_work(focus)
                 if tasks is None:
                     print('Lost connection with SQLscalpel server')
-                    if focus.getboolean('wait'):
-                        break
                     exit(-1)
 
                 # If we don't get any work we either should stop or wait for it
                 if tasks is None:
-                    olist.remove(db)
                     continue
                 if len(tasks) > 0 and 'error' in tasks[0]:
                     print('Server reported an error:', tasks[0]['error'])
-                    olist.remove(db)
-                    cnt += 1
                     continue
 
+                doit = doit or len(tasks) > 0
                 for t in tasks:
-                    cnt += 1
-                    if args.noexec:
-                        print(t)
-                        exit(-1)
                     if focus['dbms'].startswith('MonetDB'):
                         results = MonetDBClientDriver.run(focus, t['query'],)
                     # elif args.dbms.startswith('MonetDBlite'):
@@ -130,14 +119,13 @@ if __name__ == '__main__':
                         results = None
                         print('Undefined target platform', focus['dbms'])
 
-                    if not conn.put_work(t, results, debug):
+                    if not conn.put_work(t, results, focus.getboolean('debug')):
                         print('Error encountered in sending result')
                         exit(0)
-        if cnt == 0 and focus.getboolean('wait'):
+        if not doit and focus.getboolean('forever'):
             print('Wait %d seconds for more work' % delay)
             time.sleep(delay)
             if delay < 60:
                 delay += 5
-        elif cnt == 0 and not focus.getboolean('wait'):
-            print('Finished all the work')
-            doit = False
+            doit = True
+    print('Finished all the work')
