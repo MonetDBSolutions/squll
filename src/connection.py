@@ -19,7 +19,6 @@ class Connection:
     user = None
     host = None
     dbms = None
-    debug = True
 
     def __init__(self, focus,):
         """
@@ -52,32 +51,29 @@ class Connection:
         if focus.getboolean('extras'):
             # also ask for the template and binding table
             args.update({'extras':'yes'})
-        if debug:
-            self.debug = debug
+
         response = ''
         try:
-            if self.debug:
-                print('endpoint', endpoint)
-                print('requesting', json.dumps(args, sort_keys=True, indent=4))
+            if debug:
+                print('Endpoint', endpoint)
+                print('Requesting', json.dumps(args, sort_keys=True, indent=4))
             response = requests.get(endpoint,  json=args, timeout=20)
         except:
-            if self.debug:
+            if debug:
                 print('WEB SERVER RESPONSE ', response)
             return None
 
         if response.status_code != 200:
             return None
         task = json.loads(response.content)
-        if self.debug:
-            print('retrieved task:', task)
+        if debug:
+            print('Task received:', task)
 
         return task
 
     def put_work(self, task, results, debug):
-        if debug:
-            self.debug = True
         if results is None:
-            if self.debug:
+            if debug:
                 print('Missing result object')
             return None
 
@@ -91,12 +87,12 @@ class Connection:
         results.update(u)
         response = ''
         try:
-            if self.debug:
+            if debug:
                 print('sending', json.dumps(results, sort_keys=True, indent=4))
             response = requests.post(endpoint, json=results)
             return response.status_code == 200
         except:
             print('Failed to post to ', endpoint)
-        if self.debug:
-            print('sent task result', response)
+        if debug:
+            print('Sent task result', response)
         return False
