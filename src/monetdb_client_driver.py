@@ -36,8 +36,8 @@ class MonetDBClientDriver:
         db = focus['db']
         repeat = int(focus['repeat'])
         timeout = int(focus['timeout'])
-        debug = focus.getboolean('trace')
-        response = {'error': '', 'times': [], 'cnt': [], 'run': [], 'opt': [], 'sql': [], 'clock': []}
+        debug = focus.getboolean('debug')
+        response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
 
         action = 'mclient -d {database} -tperformance -ftrash -s "{query}"'
 
@@ -80,10 +80,8 @@ class MonetDBClientDriver:
             sql = float(sqlparse.match(str(proc.stdout)).group(2))
 
             response['times'].append(ms + opt + sql)
-            response['run'].append(ms)
             response['cnt'].append(-1)  # not yet collected
-            response['opt'].append(opt)
-            response['sql'].append(sql)
+            response['extra'].append([ms,opt,sql])
             response['clock'].append(nu)
 
         return response

@@ -34,7 +34,7 @@ class Connection:
         self.user = focus['user']
 
     def get_work(self, focus):
-        trace = focus.getboolean('trace')
+        debug = focus.getboolean('debug')
         batch = int(focus['batch'])
         db = focus['db']
         if 'project' in focus:
@@ -52,8 +52,8 @@ class Connection:
         if focus.getboolean('extras'):
             # also ask for the template and binding table
             args.update({'extras':'yes'})
-        if trace:
-            self.debug = trace
+        if debug:
+            self.debug = debug
         response = ''
         try:
             if self.debug:
@@ -73,8 +73,8 @@ class Connection:
 
         return task
 
-    def put_work(self, task, results, trace):
-        if trace:
+    def put_work(self, task, results, debug):
+        if debug:
             self.debug = True
         if results is None:
             if self.debug:

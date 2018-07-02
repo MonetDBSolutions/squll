@@ -35,7 +35,7 @@ class MonetDBDriver:
         db = focus['db']
         repeat = int(focus['repeat'])
         debug = focus.getboolean('trace')
-        response = {'error': '', 'times': [], 'cnt': [], 'run': [], 'opt': [], 'sql': [], 'clock': []}
+        response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
         conn = None
         try:

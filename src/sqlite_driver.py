@@ -33,7 +33,7 @@ class SqliteDriver:
         repeat = int(focus['repeat'])
         timeout = int(focus['timeout'])
         debug = focus.getboolean('trace')
-        response = {'error': '', 'times': [], 'cnt': [], 'run': [], 'opt': [], 'sql': [], 'clock': []}
+        response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
         try:
             conn = sqlite3.connect(focus['dbfarm'] + db + '.db', timeout=timeout)

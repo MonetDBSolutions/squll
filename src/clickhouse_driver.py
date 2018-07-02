@@ -34,8 +34,8 @@ class ClickhouseDriver:
         db = focus['db']
         repeat = int(focus['repeat'])
         timeout = int(focus['timeout'])
-        debug = focus.getboolean('trace')
-        response = {'error': '', 'times': [], 'cnt': [], 'run': [], 'opt': [], 'sql': [], 'clock': []}
+        debug = focus.getboolean('debug')
+        response = {'error': '', 'times': [], 'clock': []}
 
         action = 'clickhouse client --time --format=Null --query="{query}"',
 

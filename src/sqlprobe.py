@@ -59,15 +59,15 @@ if __name__ == '__main__':
 
     if args.noexec or args.target == 'DEFAULT':
         print('CONFIG SECTIONS', config.sections())
-        print('CONFIG FOCUS', args.target)
+        print('CONFIG TARGET', args.target)
         exit(0)
 
     # sanity check on the configuration file
     configkeys = ['server', 'user', 'db', 'dbms', 'host',
-                  'project', 'experiment', 'repeat', 'batch', 'trace', 'timeout', ]
+                  'project', 'experiment', 'repeat', 'batch', 'debug', 'timeout', ]
     for c in configkeys:
         if c not in focus:
-            print('Configuration key' + c + ' not set in configuration file')
+            print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
             exit(-1)
 
     # Connect to the SQLscalpel webserver
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     olist = dblist.copy()
     repeat = int(focus['repeat'])
     timeout = int(focus['timeout'])
-    trace = focus['trace']
+    debug = focus['debug']
     while doit:
         cnt = 0
         dblist = olist.copy()
@@ -111,7 +111,6 @@ if __name__ == '__main__':
                     if args.noexec:
                         print(t)
                         exit(-1)
-                    results =  None
                     if focus['dbms'].startswith('MonetDB'):
                         results = MonetDBClientDriver.run(focus, t['query'],)
                     # elif args.dbms.startswith('MonetDBlite'):
@@ -123,9 +122,10 @@ if __name__ == '__main__':
                     elif focus['dbms'].startswith('SQLite'):
                         results = SqliteDriver.run(focus, t['query'],)
                     else:
+                        results = None
                         print('Undefined target platform', focus['dbms'])
 
-                    if not conn.put_work(t, results, trace):
+                    if not conn.put_work(t, results, debug):
                         print('Error encountered in sending result')
                         exit(0)
         if cnt == 0 and focus.getboolean('wait'):
