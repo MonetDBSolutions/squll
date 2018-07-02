@@ -17,7 +17,7 @@ If you do a user installation, you will need to add the right folder to your PAT
 ```
 Thereafter you can checkout the SQLprobes repository in a local directory.
 ```
-  git clone git@github.com:MonetDBSolutions/sqlprobes.git
+  git clone git@github.com:mlkersten/sqlprobes.git
   cd sqlprobes
   pipenv install --ignore-pipfile
   cd <path/to/Pipenv.lock>
@@ -25,10 +25,6 @@ Thereafter you can checkout the SQLprobes repository in a local directory.
   cd <path/to/Pipenv>
   pipenv shell
 ```
-
-Alternatively for anaconda users try:
-export PYTHONPATH=$HOME/anaconda/lib/python3.6/site-packages:$PYTHONPATH
-export PATH=$HOME/anaconda/bin:$PATH
 
 Note, the IP address for the server should be configured in app/config.py
 and in the scalpel.conf file.
@@ -42,7 +38,7 @@ Furthermore, the host name is a nickname by which is it known in the
 SQLscalpel server.
 
 ## Credits
-SQLprobes is orginally developed by Martin Kersten.
+SQLprobes and SQLscalpel are orginally developed by Martin Kersten.
 
 ## License
 

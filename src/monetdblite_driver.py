@@ -39,7 +39,6 @@ class MonetDBliteDriver:
         try:
             print('Running on ', dbms, ':', query)
             conn = monetdblite.connect('sqlite/' + db + '.db', timeout=timeout)
-            c = conn.cursor()
         except monetdblite.DatabaseError as msg:
             print('EXCEPTION ', msg)
             return response
@@ -51,10 +50,13 @@ class MonetDBliteDriver:
         for i in range(repeat + 1):
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
+                c = conn.cursor()
                 ticks = time.time()
                 c.execute(query)
                 ticks = int((time.time() - ticks) * 1000)
                 print('ticks', ticks)
+                c.close()
+
             except monetdblite.DatabaseError as msg:
                 print('EXCEPTION ', i, msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")

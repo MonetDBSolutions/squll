@@ -55,11 +55,13 @@ class MonetDBDriver:
         for i in range(repeat):
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
-                ticks = time.time()
                 c = conn.cursor()
+                ticks = time.time()
                 c.execute(query)
                 ticks = int((time.time() - ticks) * 1000)
                 print('ticks', ticks)
+                c.close()
+
             except (Exception, pymonetdb.DatabaseError) as msg:
                 print('EXCEPTION ', msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'","''")

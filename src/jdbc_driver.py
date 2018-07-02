@@ -10,13 +10,16 @@ Author: M Kersten
 Execute a single query multiple times on the database nicknamed 'dbms'
 and return a list of timings. The first error encountered stops the sequence.
 The result is a dictionary with at least the structure {'times': [...]}
+
+This driver merely assumes a simple jdbc driver connection.
+Experimental, should be filled in.
+
 """
 
 import time
-import sqlite3
+import jaydebeapi
 
-
-class SqliteDriver:
+class JDBCDriver:
 
     def __init__(self):
         pass
@@ -24,22 +27,28 @@ class SqliteDriver:
     @staticmethod
     def run(focus, query):
         """
-        The SQLite database name is derived from the Scalpel database name with extension .db
+        The number of repetitions is used to derive the best-of value.
         :param focus:
         :param query:
         :return:
         """
         db = focus['db']
         repeat = int(focus['repeat'])
-        timeout = int(focus['timeout'])
         debug = focus.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
+        conn = None
         try:
-            conn = sqlite3.connect(focus['dbfarm'] + db + '.db', timeout=timeout)
-        except sqlite3.DatabaseError as msg:
-            print('EXCEPTION ', msg)
-            print(focus['dbfarm'] + db + '.db')
+            conn = jaydebeapi.connect("org.hsqldb.jdbcDriver",  # JDBC library
+                                      "jdbc:hsqldb:mem:.",      # url
+                                      ["SA", ""],
+                                      "/path/to/hsqldb.jar",)   # location of library
+        except (Exception, jaydebeapi.DatabaseError) as msg:
+            print('CONNECTION:', 'localhost', 5432, db)
+            print('EXCEPTION :', msg)
+            if conn is not None:
+                conn.close()
+                print('Database connection closed.')
             return response
 
         if debug:
@@ -55,7 +64,8 @@ class SqliteDriver:
                 ticks = int((time.time() - ticks) * 1000)
                 print('ticks', ticks)
                 c.close()
-            except sqlite3.DatabaseError as msg:
+
+            except (Exception, psycopg2.DatabaseError) as msg:
                 print('EXCEPTION ', i, msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")
                 return response
