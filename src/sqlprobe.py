@@ -128,4 +128,6 @@ if __name__ == '__main__':
             if delay < 60:
                 delay += 5
             doit = True
+        else:
+            delay = 5
     print('Finished all the work')
