@@ -50,7 +50,12 @@ if __name__ == '__main__':
 
     # the configuration file is consider local
     config = configparser.ConfigParser()
-    config.read(args.config)
+    try:
+        config.read(args.config)
+    except :
+        print('Could not find the configuration file')
+        exit(-1)
+
     if args.target not in config:
         print("Could not find the taget section '%s' in the configuration file '%s'" %
               (args.target, args.config))
