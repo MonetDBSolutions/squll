@@ -94,7 +94,8 @@ if __name__ == '__main__':
                 tasks = conn.get_work(focus)
                 if tasks is None:
                     print('Lost connection with SQLscalpel server')
-                    exit(-1)
+                    if not focus.getboolean('forever'):
+                        exit(-1)
 
                 # If we don't get any work we either should stop or wait for it
                 if tasks is None:
