@@ -38,6 +38,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--config', type=str, help='Configuration file to use', default='sqlprobe.conf')
 parser.add_argument('--target', type=str, help='Target system to use', default='DEFAULT')
 parser.add_argument('--version', help='Show version info', action='store_true')
+parser.add_argument('--stmt', type=str, help='Test query', default=None)
 
 
 if __name__ == '__main__':
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     try:
         config.read(args.config)
-    except :
+    except:
         print('Could not find the configuration file')
         exit(-1)
 
@@ -73,7 +74,9 @@ if __name__ == '__main__':
             exit(-1)
 
     # Connect to the SQLscalpel webserver
-    conn = Connection(target)
+    conn = None
+    if not args.stmt:
+        conn = Connection(target)
 
     dblist = target['db'].split(',').copy()
     if len(dblist) > 1:
@@ -91,7 +94,10 @@ if __name__ == '__main__':
             target['db'] = db
             for x in xlist:
                 target['experiment'] = x
-                tasks = conn.get_work(target)
+                if args.stmt:
+                    tasks = [{'query': args.stmt}]
+                else:
+                    tasks = conn.get_work(target)
                 if tasks is None:
                     print('Lost connection with SQLscalpel server')
                     if not target.getboolean('forever'):
@@ -120,9 +126,14 @@ if __name__ == '__main__':
                         results = None
                         print('Undefined target platform', target['dbms'])
 
-                    if not conn.put_work(t, results, target.getboolean('debug')):
+                    if args.stmt:
+                        print('result', results)
+                    elif not conn.put_work(t, results, target.getboolean('debug')):
                         print('Error encountered in sending result')
-                        exit(0)
+                        if not target.getboolean('forever'):
+                            exit(0)
+        if args.stmt:
+            break
         if not doit and target.getboolean('forever'):
             print('Wait %d seconds for more work' % delay)
             time.sleep(delay)
