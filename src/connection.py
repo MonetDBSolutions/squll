@@ -10,7 +10,6 @@ The tasks are obtained from a webservice. It does not itself provide a web servi
 """
 import requests
 import json
-import statistics
 
 
 class Connection:
@@ -50,7 +49,7 @@ class Connection:
                 'project': project, 'experiment': experiment, 'batch': batch, }
         if target.getboolean('extras'):
             # also ask for the template and binding table
-            args.update({'extras':'yes'})
+            args.update({'extras': 'yes'})
 
         response = ''
         try:
@@ -81,7 +80,7 @@ class Connection:
         u = {'usr': self.user, 'host': self.host, 'dbms': self.dbms,
              'tag': task['tag'], 'ptag': task['ptag'],
              'db': task['db'], 'project': task['project'], 'experiment': task['experiment'],
-             'query': task['query'].replace("'","''"), 'exp': task['exp'],
+             'query': task['query'].replace("'", "''"), 'exp': task['exp'],
              }
 
         results.update(u)

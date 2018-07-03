@@ -37,8 +37,8 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--config', type=str, help='Configuration file to use', default='sqlprobe.conf')
 parser.add_argument('--target', type=str, help='Target system to use', default='DEFAULT')
-parser.add_argument('--version', help='Show version info', action='store_true')
 parser.add_argument('--stmt', type=str, help='Test query', default=None)
+parser.add_argument('--version', help='Show version info', action='store_true')
 
 
 if __name__ == '__main__':
