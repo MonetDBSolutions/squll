@@ -25,16 +25,16 @@ class JDBCDriver:
         pass
 
     @staticmethod
-    def run(focus, query):
+    def run(target, query):
         """
         The number of repetitions is used to derive the best-of value.
-        :param focus:
+        :param target:
         :param query:
         :return:
         """
-        db = focus['db']
-        repeat = int(focus['repeat'])
-        debug = focus.getboolean('trace')
+        db = target['db']
+        repeat = int(target['repeat'])
+        debug = target.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
         conn = None

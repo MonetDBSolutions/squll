@@ -14,41 +14,41 @@ import statistics
 
 
 class Connection:
-    service = 'localhost:5000/'
+    server = 'localhost:5000/'
     name = None
     user = None
     host = None
     dbms = None
 
-    def __init__(self, focus,):
+    def __init__(self, target,):
         """
         Contact the sql server and gather some basic information of the platform to identify the platform results.
         :param newroot:
         :param key:
         :return:
         """
-        self.dbms = focus['dbms']
-        self.host = focus['host']
-        self.service = focus['server']
-        self.user = focus['user']
+        self.dbms = target['dbms']
+        self.host = target['host']
+        self.server = target['server']
+        self.user = target['user']
 
-    def get_work(self, focus):
-        debug = focus.getboolean('debug')
-        batch = int(focus['batch'])
-        db = focus['db']
-        if 'project' in focus:
-            project = focus['project']
+    def get_work(self, target):
+        debug = target.getboolean('debug')
+        batch = int(target['batch'])
+        db = target['db']
+        if 'project' in target:
+            project = target['project']
         else:
             project = 'all'
-        if 'experiment' in focus:
-            experiment = focus['experiment']
+        if 'experiment' in target:
+            experiment = target['experiment']
         else:
-            experiment = all
+            experiment = 'all'
 
-        endpoint = 'http://' + self.service + '/get_work'
+        endpoint = 'http://' + self.server + '/get_work'
         args = {'user': self.user, 'host': self.host, 'dbms': self.dbms, 'db': db,
                 'project': project, 'experiment': experiment, 'batch': batch, }
-        if focus.getboolean('extras'):
+        if target.getboolean('extras'):
             # also ask for the template and binding table
             args.update({'extras':'yes'})
 
@@ -77,7 +77,7 @@ class Connection:
                 print('Missing result object')
             return None
 
-        endpoint = 'http://' + self.service + '/put_work'
+        endpoint = 'http://' + self.server + '/put_work'
         u = {'usr': self.user, 'host': self.host, 'dbms': self.dbms,
              'tag': task['tag'], 'ptag': task['ptag'],
              'db': task['db'], 'project': task['project'], 'experiment': task['experiment'],

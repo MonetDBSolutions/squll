@@ -22,24 +22,24 @@ class SqliteDriver:
         pass
 
     @staticmethod
-    def run(focus, query):
+    def run(target, query):
         """
         The SQLite database name is derived from the Scalpel database name with extension .db
-        :param focus:
+        :param target:
         :param query:
         :return:
         """
-        db = focus['db']
-        repeat = int(focus['repeat'])
-        timeout = int(focus['timeout'])
-        debug = focus.getboolean('trace')
+        db = target['db']
+        repeat = int(target['repeat'])
+        timeout = int(target['timeout'])
+        debug = target.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
         try:
-            conn = sqlite3.connect(focus['dbfarm'] + db + '.db', timeout=timeout)
+            conn = sqlite3.connect(target['dbfarm'] + db + '.db', timeout=timeout)
         except sqlite3.DatabaseError as msg:
             print('EXCEPTION ', msg)
-            print(focus['dbfarm'] + db + '.db')
+            print(target['dbfarm'] + db + '.db')
             return response
 
         if debug:

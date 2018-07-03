@@ -57,7 +57,7 @@ if __name__ == '__main__':
         print("Could not find the taget section '%s' in the configuration file '%s'" %
               (args.target, args.config))
         exit(-1)
-    focus = config[args.target]
+    target = config[args.target]
 
     if args.target == 'DEFAULT':
         print('CONFIG SECTIONS', config.sections())
@@ -68,17 +68,17 @@ if __name__ == '__main__':
     configkeys = ['server', 'user', 'db', 'dbms', 'host',
                   'project', 'experiment', 'repeat', 'batch', 'debug', 'timeout', ]
     for c in configkeys:
-        if c not in focus:
+        if c not in target:
             print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
             exit(-1)
 
     # Connect to the SQLscalpel webserver
-    conn = Connection(focus)
+    conn = Connection(target)
 
-    dblist = focus['db'].split(',').copy()
+    dblist = target['db'].split(',').copy()
     if len(dblist) > 1:
         print('Databases:', dblist)
-    xlist = focus['experiment'].split(',').copy()
+    xlist = target['experiment'].split(',').copy()
     if len(xlist) > 1:
         print('Experiments:', xlist)
 
@@ -88,13 +88,13 @@ if __name__ == '__main__':
     while doit:
         doit = False
         for db in dblist:
-            focus['db'] = db
+            target['db'] = db
             for x in xlist:
-                focus['experiment'] = x
-                tasks = conn.get_work(focus)
+                target['experiment'] = x
+                tasks = conn.get_work(target)
                 if tasks is None:
                     print('Lost connection with SQLscalpel server')
-                    if not focus.getboolean('forever'):
+                    if not target.getboolean('forever'):
                         exit(-1)
 
                 # If we don't get any work we either should stop or wait for it
@@ -106,24 +106,24 @@ if __name__ == '__main__':
 
                 doit = doit or len(tasks) > 0
                 for t in tasks:
-                    if focus['dbms'].startswith('MonetDB'):
-                        results = MonetDBClientDriver.run(focus, t['query'],)
+                    if target['dbms'].startswith('MonetDB'):
+                        results = MonetDBClientDriver.run(target, t['query'],)
                     # elif args.dbms.startswith('MonetDBlite'):
-                    #   results = MonetDBliteDriver.run(focus, t['query'],)
-                    elif focus['dbms'].startswith('PostgreSQL'):
-                        results = PostgresDriver.run(focus, t['query'],)
-                    elif focus['dbms'].startswith('Clickhouse'):
-                        results = ClickhouseDriver.run(focus, t['query'],)
-                    elif focus['dbms'].startswith('SQLite'):
-                        results = SqliteDriver.run(focus, t['query'],)
+                    #   results = MonetDBliteDriver.run(target, t['query'],)
+                    elif target['dbms'].startswith('PostgreSQL'):
+                        results = PostgresDriver.run(target, t['query'],)
+                    elif target['dbms'].startswith('Clickhouse'):
+                        results = ClickhouseDriver.run(target, t['query'],)
+                    elif target['dbms'].startswith('SQLite'):
+                        results = SqliteDriver.run(target, t['query'],)
                     else:
                         results = None
-                        print('Undefined target platform', focus['dbms'])
+                        print('Undefined target platform', target['dbms'])
 
-                    if not conn.put_work(t, results, focus.getboolean('debug')):
+                    if not conn.put_work(t, results, target.getboolean('debug')):
                         print('Error encountered in sending result')
                         exit(0)
-        if not doit and focus.getboolean('forever'):
+        if not doit and target.getboolean('forever'):
             print('Wait %d seconds for more work' % delay)
             time.sleep(delay)
             if delay < 60:

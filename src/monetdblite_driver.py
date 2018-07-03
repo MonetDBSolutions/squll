@@ -22,18 +22,18 @@ class MonetDBliteDriver:
         pass
 
     @staticmethod
-    def run(focus, query):
+    def run(target, query):
         """
         The number of repetitions is used to derive the best-of value.
-        :param focus :
+        :param target :
         :param query :
         :return:
         """
-        db = focus['db']
-        dbms = focus['dbms']
-        repeat = int(focus['repeat'])
-        timeout = int(focus['timeout'])
-        debug = focus.getboolean('debug')
+        db = target['db']
+        dbms = target['dbms']
+        repeat = int(target['repeat'])
+        timeout = int(target['timeout'])
+        debug = target.getboolean('debug')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
         try:
