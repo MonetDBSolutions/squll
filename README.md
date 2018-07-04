@@ -27,9 +27,11 @@ Thereafter you can checkout the SQLprobes repository in a local directory.
 ```
 
 Alternatively, import the missing packages
+```
 pip install --user pymonetdb
 pip install --user configparser
 pip install --user psycopg2-binary
+```
 
 Note, the IP address for the server should be configured in app/config.py
 and in the scalpel.conf file.
@@ -42,12 +44,28 @@ IP address for the SQLscalpel server is properly set.
 Furthermore, the host name is a nickname by which is it known in the
 SQLscalpel server.
 
+Once started, it continuously requests queries from the SQLscalpel
+server to contribute with execution times (in ms) of a number of runs.
+
+The target section in the configuration file can be used to limit
+the queries acceptable for execution. Either queries for a specific
+project are ran, or even specific experiments within a project.
+The most generous way is to accept any task, as indicated with
+the pseudo project 'all' and pseudo experiment 'all'.
+
+## Policy
+Recall that all experiments should be ran in good faith with
+the intentions provided by the project owner. In particular,
+the parameter setting of the DBMS and OS should comply with
+those recorded for them in the SQLscalpel website.
+
+
 ## Credits
 SQLprobes and SQLscalpel are orginally developed by Martin Kersten.
 
 ## License
 
-This Source Code Form is subject to the terms of the Mozilla Public
+This Source Code is subject to the terms of the Mozilla Public
 License, v. 2.0.  If a copy of the MPL was not distributed with this
 repository, you can obtain one at http://mozilla.org/MPL/2.0/.
 
