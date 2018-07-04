@@ -45,7 +45,7 @@ parser.add_argument('--version', help='Show version info', action='store_true')
 if __name__ == '__main__':
     args = parser.parse_args()
     if args.version:
-        print('SQLprobe Version 0.1')
+        print('SQLprobe Version 0.2')
 
     # the configuration file is consider local
     config = configparser.ConfigParser()

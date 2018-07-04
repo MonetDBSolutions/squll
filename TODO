@@ -1,19 +1,21 @@
 [PROBES]
 [done june 27. 21:43] use a configuration file for the probes
 use a unique hash tag to mark the query sent and answer received
+improve authorization of an experimenter.
 
 [done july 1. 13:00] MonetDB connection returns 'Unknown state,...' utf-8 codec error returned USE DB LOCK
 
 [done july 1, 22:00] Move sqlprobes to its own repository
+implement Action probe
 implement Firebird probe
 implement Mariadb probe
 implement Mongodb probe
 implement Hive probe
 implement Spark/SQL probe
 implement JDBC generic probe
-Use a database connection pool
 
 extend the use cases with airtraffic
 extend the use cases with VOC
 
 gather system parameters, e.g. system load before start of experiment
+extend return vector with row-cnt and/or result-set hash
