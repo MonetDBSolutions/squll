@@ -35,7 +35,7 @@ class Connection:
         debug = target.getboolean('debug')
         batch = int(target['batch'])
         if 'db' in target:
-            db = target['project']
+            db = target['db']
         else:
             db = '*'
         if 'project' in target:
@@ -80,10 +80,9 @@ class Connection:
             return None
 
         endpoint = 'http://' + self.server + '/put_work'
-        u = {'usr': self.user, 'host': self.host, 'dbms': self.dbms,
-             'tag': task['tag'], 'ptag': task['ptag'],
+        u = {'exp': task['exp'], 'tag': task['tag'], 'ptag': task['ptag'], 'usr': self.user, 'host': self.host, 'dbms': self.dbms,
              'db': task['db'], 'project': task['project'], 'experiment': task['experiment'],
-             'query': task['query'].replace("'", "''"), 'exp': task['exp'],
+             'query': task['query'].replace("'", "''"),
              }
 
         results.update(u)
