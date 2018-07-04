@@ -57,7 +57,8 @@ server to contribute with execution times (in ms) of a number of runs.
 Recall that all experiments should be ran in good faith with
 the intentions provided by the project owner. In particular,
 the parameter setting of the DBMS and OS should comply with
-those recorded for them in the SQLscalpel website.
+those recorded for them in the SQLscalpel website. The project
+owner can discard any suspicious result or decline contributions.
 
 
 ## Credits
