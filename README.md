@@ -33,10 +33,6 @@ pip install --user configparser
 pip install --user psycopg2-binary
 ```
 
-Note, the IP address for the server should be configured in app/config.py
-and in the scalpel.conf file.
-The default is the localhost.
-
 ## Usage
 The driver program reads a configuration file from the directory in which
 it is started. A sample is included for inspiration. Make sure that the
@@ -44,14 +40,18 @@ IP address for the SQLscalpel server is properly set.
 Furthermore, the host name is a nickname by which is it known in the
 SQLscalpel server.
 
-Once started, it continuously requests queries from the SQLscalpel
-server to contribute with execution times (in ms) of a number of runs.
+SQLprobe is started with a target name, which corresponds to a section
+in the configuration file. That section may contain DBMS specific
+parameter settings.
 
-The target section in the configuration file can be used to limit
+It can also be used to limit
 the queries acceptable for execution. Either queries for a specific
 project are ran, or even specific experiments within a project.
 The most generous way is to accept any task, as indicated with
 the pseudo project 'all' and pseudo experiment 'all'.
+
+Once started, it continuously requests queries from the SQLscalpel
+server to contribute with execution times (in ms) of a number of runs.
 
 ## Policy
 Recall that all experiments should be ran in good faith with
