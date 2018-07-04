@@ -27,9 +27,10 @@ from sqlite_driver import SqliteDriver
 
 parser = argparse.ArgumentParser(
     description='SQLprobe is the experiment driver for SQLscalpel. '
-                'It should be started on each machine you want to experiment with. '
-                'The details of running the experiment script can be kept private. '
-                'However, the database/query text is provided by the server and the results '
+                'It requires an account on SQLscalpel and being a member of the team associated with a project.'
+                'SQLprobe should be started on each machine you want to experiment with. '
+                'The details of running the experiment can be kept private. '
+                'However, the query text is provided by the server and the results '
                 'are identified by the target name for comparison later.',
     epilog='''For more information see: [paper]''',
     formatter_class=argparse.HelpFormatter)

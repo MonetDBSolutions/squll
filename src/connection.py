@@ -34,15 +34,18 @@ class Connection:
     def get_work(self, target):
         debug = target.getboolean('debug')
         batch = int(target['batch'])
-        db = target['db']
+        if 'db' in target:
+            db = target['project']
+        else:
+            db = '*'
         if 'project' in target:
             project = target['project']
         else:
-            project = 'all'
+            project = '*'
         if 'experiment' in target:
             experiment = target['experiment']
         else:
-            experiment = 'all'
+            experiment = '*'
 
         endpoint = 'http://' + self.server + '/get_work'
         args = {'user': self.user, 'host': self.host, 'dbms': self.dbms, 'db': db,
