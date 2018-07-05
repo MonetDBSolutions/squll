@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     # sanity check on the configuration file
     configkeys = ['server', 'user', 'db', 'dbms', 'host',
-                  'project', 'experiment', 'repeat', 'batch', 'debug', 'timeout', ]
+                  'project', 'experiment', 'repeat', 'debug', 'timeout', ]
     for c in configkeys:
         if c not in target:
             print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
@@ -79,10 +79,10 @@ if __name__ == '__main__':
     if not args.stmt:
         conn = Connection(target)
 
-    dblist = target['db'].split(',').copy()
+    dblist = target['db'].split(',')
     if len(dblist) > 1:
         print('Databases:', dblist)
-    xlist = target['experiment'].split(',').copy()
+    xlist = target['experiment'].split(',')
     if len(xlist) > 1:
         print('Experiments:', xlist)
 
