@@ -33,7 +33,6 @@ class Connection:
 
     def get_work(self, target):
         debug = target.getboolean('debug')
-        batch = int(target['batch'])
         if 'db' in target:
             db = target['db']
         else:
@@ -49,7 +48,7 @@ class Connection:
 
         endpoint = 'http://' + self.server + '/get_work'
         args = {'user': self.user, 'host': self.host, 'dbms': self.dbms, 'db': db,
-                'project': project, 'experiment': experiment, 'batch': batch, }
+                'project': project, 'experiment': experiment, }
         if target.getboolean('extras'):
             # also ask for the template and binding table
             args.update({'extras': 'yes'})

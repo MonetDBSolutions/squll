@@ -26,8 +26,9 @@ Thereafter you can checkout the SQLprobes repository in a local directory.
   pipenv shell
 ```
 
-Alternatively, import the missing packages
+Alternatively, import the missing packages in a fresh Python virtual environment.
 ```
+pip install --user requests
 pip install --user pymonetdb
 pip install --user configparser
 pip install --user psycopg2-binary
