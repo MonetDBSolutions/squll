@@ -58,6 +58,15 @@ if __name__ == '__main__':
     print('CONFIG SECTIONS', config.sections())
     print('CONFIG TARGET', args.target)
 
+    if args.target and args.target in config:
+        target = config[args.target]
+    else:
+        target = config['target']
+    if not target:
+        print("Could not find the taget section '%s' in the configuration file '%s'" %
+              (args.target, args.config))
+        exit(-1)
+
     # sanity check on the configuration file
     configkeys = ['server', 'user', 'db', 'dbms', 'host', 'target',
                   'project', 'experiment', 'repeat', 'debug', 'timeout', ]
@@ -65,17 +74,6 @@ if __name__ == '__main__':
         if c not in target:
             print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
             exit(-1)
-
-    if args.target:
-        target = args.target
-    else:
-        target = config['target']
-    if target not in config:
-        print("Could not find the taget section '%s' in the configuration file '%s'" %
-              (args.target, args.config))
-        exit(-1)
-    else:
-        target = config[args.target]
 
     # Connect to the SQLscalpel webserver
     conn = None
