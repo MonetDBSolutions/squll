@@ -57,6 +57,15 @@ if __name__ == '__main__':
 
     print('CONFIG SECTIONS', config.sections())
     print('CONFIG TARGET', args.target)
+
+    # sanity check on the configuration file
+    configkeys = ['server', 'user', 'db', 'dbms', 'host', 'target',
+                  'project', 'experiment', 'repeat', 'debug', 'timeout', ]
+    for c in configkeys:
+        if c not in target:
+            print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
+            exit(-1)
+
     if args.target:
         target = args.target
     else:
@@ -67,14 +76,6 @@ if __name__ == '__main__':
         exit(-1)
     else:
         target = config[args.target]
-
-    # sanity check on the configuration file
-    configkeys = ['server', 'user', 'db', 'dbms', 'host',
-                  'project', 'experiment', 'repeat', 'debug', 'timeout', ]
-    for c in configkeys:
-        if c not in target:
-            print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
-            exit(-1)
 
     # Connect to the SQLscalpel webserver
     conn = None
