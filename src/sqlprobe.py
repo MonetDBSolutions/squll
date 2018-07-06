@@ -56,10 +56,13 @@ if __name__ == '__main__':
         exit(-1)
 
     if args.target not in config:
-        print("Could not find the taget section '%s' in the configuration file '%s'" %
-              (args.target, args.config))
-        exit(-1)
-    target = config[args.target]
+        target = config['target']
+        if target not in config:
+            print("Could not find the taget section '%s' in the configuration file '%s'" %
+                  (args.target, args.config))
+            exit(-1)
+    else:
+        target = config[args.target]
 
     if args.target == 'DEFAULT':
         print('CONFIG SECTIONS', config.sections())
