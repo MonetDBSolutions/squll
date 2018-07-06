@@ -20,18 +20,15 @@ Thereafter you can checkout the SQLprobes repository in a local directory.
   git clone git@github.com:mlkersten/sqlprobes.git
   cd sqlprobes
   pipenv install --ignore-pipfile
-  cd <path/to/Pipenv.lock>
-  pipenv install --ignore-pipfile
-  cd <path/to/Pipenv>
   pipenv shell
 ```
 
-Alternatively, import the missing packages in a fresh Python virtual environment.
+Import any missing package in the fresh Python virtual environment.
 ```
-pip install --user requests
-pip install --user pymonetdb
-pip install --user configparser
-pip install --user psycopg2-binary
+pip install requests
+pip install pymonetdb
+pip install configparser
+pip install psycopg2-binary
 ```
 
 ## Usage
