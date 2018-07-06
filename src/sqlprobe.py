@@ -61,8 +61,8 @@ if __name__ == '__main__':
     if args.target and args.target in config:
         target = config[args.target]
     elif 'target' in config['DEFAULT']:
-        target = config['target']
-        
+        target = config[config['DEFAULT']['target']]
+
     if not target:
         print("Could not find the taget section '%s' in the configuration file '%s'" %
               (args.target, args.config))
