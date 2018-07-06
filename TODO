@@ -15,9 +15,11 @@ extend the use cases with VOC
 
 gather system parameters, e.g. system load before start of experiment
 extend return vector with row-cnt and/or result-set hash
+implement output channel for offline processing
 
 [done june 27. 21:43] use a configuration file for the probes
 [done july 1. 13:00] MonetDB connection returns 'Unknown state,...' utf-8 codec error returned USE DB LOCK
 [done july 2, 22:00] Move sqlprobes to its own repository
 
-[done, july 4 20:30]  handle the '*' properly in queue.getwork for project/experiment
+[done, july 4 20:30] handle the '*' properly in queue.getwork for project/experiment
+[done, july 5 22:00] added error bail out and first part of offline processing
