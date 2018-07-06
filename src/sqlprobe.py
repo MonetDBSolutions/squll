@@ -39,7 +39,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--config', type=str, help='Configuration file to use', default='sqlprobe.conf')
 parser.add_argument('--target', type=str, help='Target system to use', default=None)
 parser.add_argument('--stmt', type=str, help='Test query', default=None)
-parser.add_argument('--offline', help='Just collect the queries', action='store_false')
+parser.add_argument('--offline', help='Just collect the queries', action='store_true')
 parser.add_argument('--version', help='Show version info', action='store_true')
 
 
@@ -119,20 +119,20 @@ if __name__ == '__main__':
                 if len(tasks) > 0 and 'error' in tasks[0]:
                     print('Server reported an error:', tasks[0]['error'])
                     bailout -= 1
-                    if bailout < 0:
+                    if bailout == 0:
                         print('Bail out after too many database server errors')
                         exit(-1)
                     continue
 
                 doit = doit or len(tasks) > 0
                 for t in tasks:
-                    print('error?', t['error'], bailout)
-                    if t['error'] != '':
+                    if 'error' in t:
                         bailout -= 1
-                        if bailout < 0:
+                        if bailout == 0:
                             print('Bail out after too many (%d) database errors' % bailout)
                             exit(-1)
                         continue
+
                     if target['dbms'].startswith('MonetDB'):
                         results = MonetDBClientDriver.run(target, t['query'],)
                     # elif args.dbms.startswith('MonetDBlite'):
@@ -146,11 +146,10 @@ if __name__ == '__main__':
                     else:
                         results = None
                         print('Undefined target platform', target['dbms'])
-                    print('error?', result['error'])
 
                     if results['error'] != '':
                         bailout -= 1
-                        if bailout < 0:
+                        if bailout == 0:
                             print('Bail out after too many database target errors')
                             exit(-1)
                     if args.stmt:
