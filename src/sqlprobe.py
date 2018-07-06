@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser(
 
 
 parser.add_argument('--config', type=str, help='Configuration file to use', default='sqlprobe.conf')
-parser.add_argument('--target', type=str, help='Target system to use', default='DEFAULT')
+parser.add_argument('--target', type=str, help='Target system to use', default=None)
 parser.add_argument('--stmt', type=str, help='Test query', default=None)
 parser.add_argument('--version', help='Show version info', action='store_true')
 
@@ -55,19 +55,18 @@ if __name__ == '__main__':
         print('Could not find the configuration file')
         exit(-1)
 
-    if args.target not in config:
+    print('CONFIG SECTIONS', config.sections())
+    print('CONFIG TARGET', args.target)
+    if args.target:
+        target = args.target
+    else:
         target = config['target']
-        if target not in config:
-            print("Could not find the taget section '%s' in the configuration file '%s'" %
-                  (args.target, args.config))
-            exit(-1)
+    if target not in config:
+        print("Could not find the taget section '%s' in the configuration file '%s'" %
+              (args.target, args.config))
+        exit(-1)
     else:
         target = config[args.target]
-
-    if args.target == 'DEFAULT':
-        print('CONFIG SECTIONS', config.sections())
-        print('CONFIG TARGET', args.target)
-        exit(0)
 
     # sanity check on the configuration file
     configkeys = ['server', 'user', 'db', 'dbms', 'host',
