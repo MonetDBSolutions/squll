@@ -39,6 +39,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--config', type=str, help='Configuration file to use', default='sqlprobe.conf')
 parser.add_argument('--target', type=str, help='Target system to use', default=None)
 parser.add_argument('--stmt', type=str, help='Test query', default=None)
+parser.add_argument('--offline', help='Just collect the queries', action='store_false')
 parser.add_argument('--version', help='Show version info', action='store_true')
 
 
@@ -69,8 +70,8 @@ if __name__ == '__main__':
         exit(-1)
 
     # sanity check on the configuration file
-    configkeys = ['server', 'user', 'db', 'dbms', 'host', 'target',
-                  'project', 'experiment', 'repeat', 'debug', 'timeout', ]
+    configkeys = ['server', 'user', 'db', 'dbms', 'host', 'target', 'bailout',
+                  'project', 'experiment', 'repeat', 'debug', 'timeout', 'input']
     for c in configkeys:
         if c not in target:
             print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
@@ -90,6 +91,7 @@ if __name__ == '__main__':
 
     doit = True
     delay = 5
+    bailout = int(target['bailout'])
 
     while doit:
         doit = False
@@ -105,16 +107,32 @@ if __name__ == '__main__':
                     print('Lost connection with SQLscalpel server')
                     if not target.getboolean('forever'):
                         exit(-1)
+                if args.offline:
+                    # collect all work in a local file for post processing.
+                    for x in tasks:
+                        print('task:',x)
+                    continue
 
                 # If we don't get any work we either should stop or wait for it
                 if tasks is None:
                     continue
                 if len(tasks) > 0 and 'error' in tasks[0]:
                     print('Server reported an error:', tasks[0]['error'])
+                    bailout -= 1
+                    if bailout < 0:
+                        print('Bail out after too many database server errors')
+                        exit(-1)
                     continue
 
                 doit = doit or len(tasks) > 0
                 for t in tasks:
+                    print('error?', t['error'], bailout)
+                    if t['error'] != '':
+                        bailout -= 1
+                        if bailout < 0:
+                            print('Bail out after too many (%d) database errors' % bailout)
+                            exit(-1)
+                        continue
                     if target['dbms'].startswith('MonetDB'):
                         results = MonetDBClientDriver.run(target, t['query'],)
                     # elif args.dbms.startswith('MonetDBlite'):
@@ -128,7 +146,13 @@ if __name__ == '__main__':
                     else:
                         results = None
                         print('Undefined target platform', target['dbms'])
+                    print('error?', result['error'])
 
+                    if results['error'] != '':
+                        bailout -= 1
+                        if bailout < 0:
+                            print('Bail out after too many database target errors')
+                            exit(-1)
                     if args.stmt:
                         print('result', results)
                     elif not conn.put_work(t, results, target.getboolean('debug')):

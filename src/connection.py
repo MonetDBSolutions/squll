@@ -18,6 +18,7 @@ class Connection:
     user = None
     host = None
     dbms = None
+    tasks = None
 
     def __init__(self, target,):
         """
@@ -30,9 +31,24 @@ class Connection:
         self.host = target['host']
         self.server = target['server']
         self.user = target['user']
+        if target['input']:
+            # read the input file with experiment records and process them one by one
+            with open(target['input'], 'r') as f:
+                self.tasks = json.loads(f.read())
+                f.close()
+                print('Restored a batch of %d tasks', len(self.tasks))
 
     def get_work(self, target):
         debug = target.getboolean('debug')
+
+        # read from the batch file first
+        if self.tasks:
+            t = self.tasks[0]
+            self.tasks.remove(0)
+            return t
+        if self.tasks == []:
+            return None
+
         if 'db' in target:
             db = target['db']
         else:
