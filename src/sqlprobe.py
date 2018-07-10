@@ -24,6 +24,7 @@ from monetdb_client_driver import MonetDBClientDriver
 from clickhouse_driver import ClickhouseDriver
 from postgres_driver import PostgresDriver
 from sqlite_driver import SqliteDriver
+from actian_client_driver import ActianClientDriver
 
 parser = argparse.ArgumentParser(
     description='SQLprobe is the experiment driver for SQLscalpel. '
@@ -143,6 +144,8 @@ if __name__ == '__main__':
                         results = ClickhouseDriver.run(target, t['query'],)
                     elif target['dbms'].startswith('SQLite'):
                         results = SqliteDriver.run(target, t['query'],)
+                    elif target['dbms'].startswith('Actian'):
+                        results = ActianClientDriver.run(target, t['query'], )
                     else:
                         results = None
                         print('Undefined target platform', target['dbms'])
