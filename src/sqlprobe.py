@@ -39,6 +39,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--config', type=str, help='Configuration file to use', default='sqlprobe.conf')
 parser.add_argument('--target', type=str, help='Target system to use', default=None)
+parser.add_argument('--bailout', type=int, help='Stop after errors', default=None)
 parser.add_argument('--stmt', type=str, help='Test query', default=None)
 parser.add_argument('--offline', help='Just collect the queries', action='store_true')
 parser.add_argument('--version', help='Show version info', action='store_true')
@@ -71,8 +72,10 @@ if __name__ == '__main__':
         exit(-1)
 
     # sanity check on the configuration file
-    configkeys = ['server', 'user', 'db', 'dbms', 'host', 'target', 'bailout',
+    configkeys = ['server', 'user', 'db', 'dbms', 'host', 'bailout',
                   'project', 'experiment', 'repeat', 'debug', 'timeout', 'input']
+    if not args.target:
+        configkeys.append('target')
     for c in configkeys:
         if c not in target:
             print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
