@@ -40,16 +40,15 @@ class ActianClientDriver:
         debug = False # target.getboolean('debug')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
 
-        action = 'sql -S "{database}"'
+        action = 'sql "{database}"'
 
-        z = action.format(query=query, database=db)
+        z = action.format(database=db)
         args = shlex.split(z)
 
         # Retrieve output for post analysis
         out = subprocess.PIPE
         err = subprocess.STDOUT
 
-        query = ' '.join(args)
         if debug:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
             print('Run query:', nu, ':',  query)
