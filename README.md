@@ -46,7 +46,7 @@ It can also be used to limit
 the queries acceptable for execution. Either queries for a specific
 project are ran, or even specific experiments within a project.
 The most generous way is to accept any task, as indicated with
-the pseudo project 'all' and pseudo experiment 'all'.
+the pseudo project '*' and pseudo experiment '*'.
 
 Once started, it continuously requests queries from the SQLscalpel
 server to contribute with execution times (in ms) of a number of runs.

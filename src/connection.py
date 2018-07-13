@@ -83,6 +83,8 @@ class Connection:
         if response.status_code != 200:
             return None
         task = json.loads(response.content)
+        if not task:
+            print('No tasks available for the target section', json.dumps(args, sort_keys=True, indent=4))
         if debug:
             print('Task received:', task)
 

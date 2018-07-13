@@ -58,8 +58,8 @@ if __name__ == '__main__':
         print('Could not find the configuration file')
         exit(-1)
 
-    print('CONFIG SECTIONS', config.sections())
-    print('CONFIG TARGET', args.target)
+    # print('CONFIG SECTIONS', config.sections())
+    # print('CONFIG TARGET', args.target)
 
     if args.target and args.target in config:
         target = config[args.target]
