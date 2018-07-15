@@ -16,6 +16,7 @@ class Connection:
     server = 'localhost:5000/'
     name = None
     user = None
+    passwd = None
     host = None
     dbms = None
     tasks = None
@@ -31,6 +32,8 @@ class Connection:
         self.host = target['host']
         self.server = target['server']
         self.user = target['user']
+        # construct password hash
+
         if target['input']:
             # read the input file with experiment records and process them one by one
             with open(target['input'], 'r') as f:
@@ -64,7 +67,7 @@ class Connection:
 
         endpoint = 'http://' + self.server + '/get_work'
         args = {'user': self.user, 'host': self.host, 'dbms': self.dbms, 'db': db,
-                'project': project, 'experiment': experiment, }
+                'project': project, 'experiment': experiment, 'passwordhash': 0}
         if target.getboolean('extras'):
             # also ask for the template and binding table
             args.update({'extras': 'yes'})
