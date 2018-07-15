@@ -35,14 +35,15 @@ class MariaDBDriver:
         :return:
         """
         db = target['db']
+        socket = target['socket']
         repeat = int(target['repeat'])
         timeout = int(target['timeout'])
         debug = False # target.getboolean('debug')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
 
-        action = 'mysql -S %s ' % target['socket']
+        action = 'mysql -S %s -D {database} '
 
-        z = action.format(database=db)
+        z = action.format(socket=socket, database=db)
         args = shlex.split(z)
 
         # Retrieve output for post analysis
