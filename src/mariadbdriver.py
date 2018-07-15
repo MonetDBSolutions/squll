@@ -35,13 +35,13 @@ class MariaDBDriver:
         :return:
         """
         db = target['db']
-        socket = target['socket']
+        socket = target['dbsocket']
         repeat = int(target['repeat'])
         timeout = int(target['timeout'])
         debug = False # target.getboolean('debug')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
 
-        action = 'mysql -S %s -D {database} '
+        action = target['command']
 
         z = action.format(socket=socket, database=db)
         args = shlex.split(z)

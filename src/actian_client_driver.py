@@ -41,6 +41,7 @@ class ActianClientDriver:
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
 
         action = 'sql "{database}"'
+        action = target['command']
 
         z = action.format(database=db)
         args = shlex.split(z)
