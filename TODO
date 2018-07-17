@@ -26,6 +26,6 @@ implement offline bulk processing
 
 [july 4 20:30] handle the '*' properly in queue.getwork for project/experiment
 [july 5 22:00] added error bail out and first part of offline processing
-[july 13 10:00] implement Action probe
+[july 13 10:00] implement Actian probe
 [july 17 12:00]implement Mariadb probe
 [july 17 21:00]implement Firebird probe

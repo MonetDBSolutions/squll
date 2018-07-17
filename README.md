@@ -17,7 +17,7 @@ If you do a user installation, you will need to add the right folder to your PAT
 ```
 Thereafter you can checkout the SQLprobes repository in a local directory.
 ```
-  git clone git@github.com:mlkersten/sqlprobes.git
+  git clone git@github.com:MonetDBSolutions/sqlprobes.git
   cd sqlprobes
   pipenv install --ignore-pipfile
   pipenv shell
