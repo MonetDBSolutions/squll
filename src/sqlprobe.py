@@ -25,7 +25,8 @@ from clickhouse_driver import ClickhouseDriver
 from postgres_driver import PostgresDriver
 from sqlite_driver import SqliteDriver
 from actian_client_driver import ActianClientDriver
-from mariadbdriver import MariaDBDriver
+from mariadb_driver import MariaDBDriver
+from firebird_driver import FirebirdDriver
 
 parser = argparse.ArgumentParser(
     description='SQLprobe is the experiment driver for SQLscalpel. '
@@ -73,8 +74,8 @@ if __name__ == '__main__':
         exit(-1)
 
     # sanity check on the configuration file
-    configkeys = ['server', 'user', 'db', 'dbms', 'host', 'bailout',
-                  'project', 'experiment', 'repeat', 'debug', 'timeout', 'input']
+    configkeys = ['home', 'server', 'user', 'db', 'dbms', 'host', 'bailout',
+                  'project', 'experiment', 'repeat', 'debug', 'timeout', ]
     if not args.target:
         configkeys.append('target')
     for c in configkeys:
@@ -105,7 +106,8 @@ if __name__ == '__main__':
             for x in xlist:
                 target['experiment'] = x
                 if args.stmt:
-                    tasks = [{'query': args.stmt}]
+                    tasks = [target]
+                    tasks[0]['query'] = args.stmt
                 else:
                     tasks = conn.get_work(target)
                 if tasks is None:
@@ -152,6 +154,8 @@ if __name__ == '__main__':
                         results = ActianClientDriver.run(target, t['query'], )
                     elif target['dbms'].startswith('MariaDB'):
                         results = MariaDBDriver.run(target, t['query'], )
+                    elif target['dbms'].startswith('Firebird'):
+                        results = MariaDBDriver.run(target, t['query'], )
                     else:
                         results = None
                         print('Undefined target platform', target['dbms'])
@@ -162,7 +166,7 @@ if __name__ == '__main__':
                             print('Bail out after too many database target errors')
                             exit(-1)
                     if args.stmt:
-                        print('result', results)
+                        print('result', dict(t), results)
                     elif not conn.put_work(t, results, target.getboolean('debug')):
                         print('Error encountered in sending result')
                         if not target.getboolean('forever'):

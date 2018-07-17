@@ -25,26 +25,20 @@ Thereafter you can checkout the SQLprobes repository in a local directory.
 
 Import any missing package in the fresh Python virtual environment.
 ```
-pip install --user requests
-pip install --user pymonetdb
-pip install --user configparser
-pip install --user psycopg2-binary
+pip install requests pymonetdb configparser psycopg2-binary mysql-connector fdb
 ```
 
 ## Usage
-The driver program reads a configuration file from the directory in which
-it is started. A sample is included for inspiration. Make sure that the
-IP address for the SQLscalpel server is properly set.
-Furthermore, the host name is a nickname by which is it known in the
-SQLscalpel server.
+The driver program reads a configuration file 'sqlprobe.conf' from the directory in which
+it is started. A sample is included for inspiration and documentation. Make sure that the
+global parameters are set correctly.
 
 SQLprobe is started with a target name, which corresponds to a section
 in the configuration file. That section may contain DBMS specific
 parameter settings.
 
-It can also be used to limit
-the queries acceptable for execution. Either queries for a specific
-project are ran, or even specific experiments within a project.
+It can also be used to limit the queries acceptable for execution. 
+Either queries for a specific project are ran, or even specific experiments within a project.
 The most generous way is to accept any task, as indicated with
 the pseudo project '*' and pseudo experiment '*'.
 
