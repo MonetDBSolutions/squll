@@ -19,6 +19,7 @@ class Connection:
     passwd = None
     host = None
     dbms = None
+    version = None
     tasks = None
 
     def __init__(self, target,):
@@ -29,12 +30,13 @@ class Connection:
         :return:
         """
         self.dbms = target['dbms']
+        self.version = target['version']
         self.host = target['host']
         self.server = target['server']
         self.user = target['user']
         # construct password hash
 
-        if target['input']:
+        if 'input' in target and target['input']:
             # read the input file with experiment records and process them one by one
             with open(target['input'], 'r') as f:
                 self.tasks = json.loads(f.read())
@@ -66,7 +68,7 @@ class Connection:
             experiment = '*'
 
         endpoint = 'http://' + self.server + '/get_work'
-        args = {'user': self.user, 'host': self.host, 'dbms': self.dbms, 'db': db,
+        args = {'user': self.user, 'host': self.host, 'dbms': self.dbms, 'version':self.version, 'db': db,
                 'project': project, 'experiment': experiment, 'passwordhash': 0}
         if target.getboolean('extras'):
             # also ask for the template and binding table
@@ -100,7 +102,8 @@ class Connection:
             return None
 
         endpoint = 'http://' + self.server + '/put_work'
-        u = {'exp': task['exp'], 'tag': task['tag'], 'ptag': task['ptag'], 'usr': self.user, 'host': self.host, 'dbms': self.dbms,
+        u = {'exp': task['exp'], 'tag': task['tag'], 'ptag': task['ptag'],
+             'usr': self.user, 'host': self.host, 'dbms': self.dbms, 'version': self.version,
              'db': task['db'], 'project': task['project'], 'experiment': task['experiment'],
              'query': task['query'].replace("'", "''"),
              }
