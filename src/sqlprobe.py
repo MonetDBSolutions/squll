@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     # print('CONFIG SECTIONS', config.sections())
     # print('CONFIG TARGET', args.target)
-
+    target = None
     if args.target and args.target in config:
         target = config[args.target]
     elif 'target' in config['DEFAULT']:
@@ -82,7 +82,6 @@ if __name__ == '__main__':
         if c not in target:
             print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
             exit(-1)
-
     # Connect to the SQLscalpel webserver
     conn = None
     if not args.stmt:
