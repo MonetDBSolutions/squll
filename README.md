@@ -23,11 +23,6 @@ Thereafter you can checkout the SQLprobes repository in a local directory.
   pipenv shell
 ```
 
-Import any missing package in the fresh Python virtual environment.
-```
-pip install requests pymonetdb configparser psycopg2-binary mysql-connector fdb
-```
-
 ## Usage
 The driver program reads a configuration file 'sqlprobe.conf' from the directory in which
 it is started. A sample is included for inspiration and documentation. Make sure that the
