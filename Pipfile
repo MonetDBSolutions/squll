@@ -4,6 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+requests = "*"
+pymonetdb = "*"
+configparser = "*"
+"psycopg2-binary" = "*"
+mysql-connector = "*"
+fdb = "*"
 
 [dev-packages]
 
