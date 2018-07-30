@@ -39,7 +39,7 @@ class JDBCDriver:
 
         conn = None
         try:
-            conn = jaydebeapi.connect("org.hsqldb.jdbcDriver",  # JDBC library
+            conn = jaydebeapi.connect("org.hsqldb.jdbcDriver",  # JDBC library name
                                       "jdbc:hsqldb:mem:.",      # url
                                       ["SA", ""],
                                       "/path/to/hsqldb.jar",)   # location of library
