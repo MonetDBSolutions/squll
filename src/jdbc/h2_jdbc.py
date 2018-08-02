@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Dict
 
-from .jdbc.jdbc_driver import AbstractJDBCImplementation
+from .jdbc_driver import AbstractJDBCImplementation
 
 
 class AbstractH2JDBCDriver(AbstractJDBCImplementation):
