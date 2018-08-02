@@ -27,8 +27,8 @@ from sqlite_driver import SqliteDriver
 from actian_client_driver import ActianClientDriver
 from mariadb_driver import MariaDBDriver
 from firebird_driver import FirebirdDriver
-from src.jdbc.jdbc_driver import JDBCDriver
-from src.jdbc.h2_jdbc import H2EmbeddedJDBCDriver, H2ClientServerJDBCDriver
+from jdbc.jdbc_driver import JDBCDriver
+from jdbc.h2_jdbc import H2EmbeddedJDBCDriver, H2ClientServerJDBCDriver
 
 parser = argparse.ArgumentParser(
     description='SQLprobe is the experiment driver for SQLscalpel. '
