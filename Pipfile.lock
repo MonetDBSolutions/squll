@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ff39f17b220c9f638dbfabdbc84521217921da789c37e8785df657cb3d08bd36"
+            "sha256": "9bd1befc625f5ed661bbc242a7691838e05580e2117e5965aa95c714133ad8b9"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -57,6 +57,21 @@
                 "sha256:684a38a6f903c1d71d6d5fac066b58d7768af4de2b832e426ec79c30daa94a16"
             ],
             "version": "==2.7"
+        },
+        "jaydebeapi": {
+            "hashes": [
+                "sha256:52680ec30a667ce0ea8add09bdc7a3a7a842f8b914576512b58016864b4e4117",
+                "sha256:7a29e4069d7e7e8067c3dba6edb156175ce660bdc331c96fc134354e69f98d0f",
+                "sha256:ba2dfa92c55e39476cea5a4b1a1750d94c8b3d166ed3c7f99601f19f744f2828"
+            ],
+            "index": "pypi",
+            "version": "==1.1.1"
+        },
+        "jpype1": {
+            "hashes": [
+                "sha256:6841523631874a731e1f94e1b1f130686ad3772030eaa3b6946256eeb1d10dd1"
+            ],
+            "version": "==0.6.3"
         },
         "mysql-connector": {
             "hashes": [
@@ -129,7 +144,7 @@
                 "sha256:a68ac5e15e76e7e5dd2b8f94007233e01effe3e50e8daddf69acfd81cb686baf",
                 "sha256:b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5"
             ],
-            "markers": "python_version != '3.2.*' and python_version < '4' and python_version >= '2.6' and python_version != '3.3.*' and python_version != '3.1.*' and python_version != '3.0.*'",
+            "markers": "python_version != '3.3.*' and python_version < '4' and python_version != '3.2.*' and python_version != '3.0.*' and python_version != '3.1.*' and python_version >= '2.6'",
             "version": "==1.23"
         }
     },

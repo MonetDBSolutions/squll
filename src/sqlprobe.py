@@ -27,6 +27,8 @@ from sqlite_driver import SqliteDriver
 from actian_client_driver import ActianClientDriver
 from mariadb_driver import MariaDBDriver
 from firebird_driver import FirebirdDriver
+from src.jdbc.jdbc_driver import JDBCDriver
+from src.jdbc.h2_jdbc import H2EmbeddedJDBCDriver, H2ClientServerJDBCDriver
 
 parser = argparse.ArgumentParser(
     description='SQLprobe is the experiment driver for SQLscalpel. '
@@ -69,7 +71,7 @@ if __name__ == '__main__':
         target = config[config['DEFAULT']['target']]
 
     if not target:
-        print("Could not find the taget section '%s' in the configuration file '%s'" %
+        print("Could not find the target section '%s' in the configuration file '%s'" %
               (args.target, args.config))
         exit(-1)
 
@@ -155,6 +157,10 @@ if __name__ == '__main__':
                         results = MariaDBDriver.run(target, t['query'], )
                     elif target['dbms'].startswith('Firebird'):
                         results = MariaDBDriver.run(target, t['query'], )
+                    elif target['dbms'].startswith('H2-Client-Server'):
+                        results = JDBCDriver.run(target, t['query'], H2ClientServerJDBCDriver(target))
+                    elif target['dbms'].startswith('H2-Embedded'):
+                        results = JDBCDriver.run(target, t['query'], H2EmbeddedJDBCDriver(target))
                     else:
                         results = None
                         print('Undefined target platform', target['dbms'])

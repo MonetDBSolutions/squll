@@ -19,32 +19,74 @@ Experimental, should be filled in.
 import time
 import jaydebeapi
 
+from abc import abstractmethod
+from typing import Dict
+
+
+class AbstractJDBCImplementation:
+
+    def __init__(self, properties: Dict[str, str]):
+        config_keys = ['uri', 'jar', 'user']
+        for c in config_keys:
+            if c not in properties:
+                print('Configuration key "%s" not set in configuration file for target "%s"' % (
+                        c, self.get_database_system_name()))
+                exit(-1)
+        self.uri = properties['uri']
+        self.jar = properties['jar']
+        self.properties = self._compile_jdbc_properties(properties)
+        self.properties['user'] = properties['user']
+        pass
+
+    @abstractmethod
+    def get_database_system_name(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_java_driver_class(self) -> str:
+        pass
+
+    def get_jdbc_uri(self) -> str:
+        return self.uri
+
+    def get_jdbc_jar_file_path(self) -> str:
+        return self.jar
+
+    def get_jdbc_properties(self) -> Dict[str, str]:
+        return self.properties
+
+    @abstractmethod
+    def _compile_jdbc_properties(self, properties: Dict[str, str]) -> Dict[str, str]:
+        pass
+
+
 class JDBCDriver:
 
     def __init__(self):
         pass
 
     @staticmethod
-    def run(target, query):
+    def run(target, query, implementation: AbstractJDBCImplementation):
         """
         The number of repetitions is used to derive the best-of value.
         :param target:
         :param query:
+        :param implementation: An JDBC implementation Python class
         :return:
         """
         db = target['db']
+        jdbc_uri = implementation.get_jdbc_uri().format(database=db)
         repeat = int(target['repeat'])
         debug = target.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
         conn = None
         try:
-            conn = jaydebeapi.connect("org.hsqldb.jdbcDriver",  # JDBC library name
-                                      "jdbc:hsqldb:mem:.",      # url
-                                      ["SA", ""],
-                                      "/path/to/hsqldb.jar",)   # location of library
+            conn = jaydebeapi.connect(implementation.get_java_driver_class(),   # JDBC library class
+                                      jdbc_uri,                                 # JDBC uri
+                                      implementation.get_jdbc_properties(),     # properties for the driver
+                                      implementation.get_jdbc_jar_file_path())  # location of the jar
         except (Exception, jaydebeapi.DatabaseError) as msg:
-            print('CONNECTION:', 'localhost', 5432, db)
             print('EXCEPTION :', msg)
             if conn is not None:
                 conn.close()
@@ -65,8 +107,8 @@ class JDBCDriver:
                 print('ticks', ticks)
                 c.close()
 
-            except (Exception, psycopg2.DatabaseError) as msg:
-                print('EXCEPTION ', i, msg)
+            except Exception as msg:
+                print('EXCEPTION :', i, msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")
                 return response
 

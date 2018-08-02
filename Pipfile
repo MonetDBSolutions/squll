@@ -10,6 +10,7 @@ configparser = "*"
 "psycopg2-binary" = "*"
 mysql-connector = "*"
 fdb = "*"
+jaydebeapi = "*"
 
 [dev-packages]
 
