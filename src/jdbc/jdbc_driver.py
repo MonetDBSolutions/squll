@@ -26,14 +26,14 @@ from typing import Dict
 class AbstractJDBCImplementation:
 
     def __init__(self, properties: Dict[str, str]):
-        config_keys = ['uri', 'jar', 'user']
+        config_keys = ['uri', 'jars', 'user']
         for c in config_keys:
             if c not in properties:
                 print('Configuration key "%s" not set in configuration file for target "%s"' % (
                         c, self.get_database_system_name()))
                 exit(-1)
         self.uri = properties['uri']
-        self.jar = properties['jar']
+        self.jars = [x.strip() for x in properties['jars'].split(',')]
         self.properties = self._compile_jdbc_properties(properties)
         self.properties['user'] = properties['user']
         pass
@@ -49,8 +49,8 @@ class AbstractJDBCImplementation:
     def get_jdbc_uri(self) -> str:
         return self.uri
 
-    def get_jdbc_jar_file_path(self) -> str:
-        return self.jar
+    def get_jdbc_jars_path(self) -> [str]:
+        return self.jars
 
     def get_jdbc_properties(self) -> Dict[str, str]:
         return self.properties
@@ -71,7 +71,7 @@ class JDBCDriver:
         The number of repetitions is used to derive the best-of value.
         :param target:
         :param query:
-        :param implementation: An JDBC implementation Python class
+        :param implementation: A JDBC implementation Python class
         :return:
         """
         db = target['db']
@@ -82,10 +82,10 @@ class JDBCDriver:
 
         conn = None
         try:
-            conn = jaydebeapi.connect(implementation.get_java_driver_class(),   # JDBC library class
-                                      jdbc_uri,                                 # JDBC uri
-                                      implementation.get_jdbc_properties(),     # properties for the driver
-                                      implementation.get_jdbc_jar_file_path())  # location of the jar
+            conn = jaydebeapi.connect(implementation.get_java_driver_class(),  # JDBC library class
+                                      jdbc_uri,                                # JDBC uri
+                                      implementation.get_jdbc_properties(),    # properties for the driver
+                                      implementation.get_jdbc_jars_path())     # location of the jar
         except (Exception, jaydebeapi.DatabaseError) as msg:
             print('EXCEPTION :', msg)
             if conn is not None:
