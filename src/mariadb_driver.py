@@ -66,6 +66,7 @@ class MariaDBDriver:
                 # a timeout should also stop the database process involved the hard way
                 print('EXCEPTION ', i,  msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")
+                conn.close()
                 return response
 
             if debug:
@@ -76,4 +77,5 @@ class MariaDBDriver:
             response['extra'].append([])
             response['clock'].append(nu)
 
+        conn.close()
         return response

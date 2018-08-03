@@ -59,12 +59,14 @@ class PostgresDriver:
                 ticks = int((time.time() - ticks) * 1000)
                 print('ticks', ticks)
                 c.close()
-
             except (Exception, psycopg2.DatabaseError) as msg:
                 print('EXCEPTION ', i, msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")
+                conn.close()
                 return response
 
             response['times'].append(ticks)
             response['clock'].append(nu)
+
+        conn.close()
         return response

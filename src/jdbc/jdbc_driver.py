@@ -110,8 +110,11 @@ class JDBCDriver:
             except Exception as msg:
                 print('EXCEPTION :', i, msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")
+                conn.close()
                 return response
 
             response['times'].append(ticks)
             response['clock'].append(nu)
+
+        conn.close()
         return response
