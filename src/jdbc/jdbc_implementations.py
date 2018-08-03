@@ -59,6 +59,21 @@ class ApacheDerbyJDBCDriver(AbstractJDBCImplementation):
         return ['password', 'create', 'logDevice']
 
 
+class ApacheHiveJDBCDriver(AbstractJDBCImplementation):
+
+    def __init__(self, conf_properties: Dict[str, str]):
+        super().__init__(conf_properties)
+
+    def get_database_system_name(self) -> str:
+        return "Apache Hive"
+
+    def get_java_driver_class(self) -> str:
+        return "org.apache.hadoop.hive.jdbc.HiveDriver"
+
+    def get_supported_properties(self) -> [str]:
+        return ['password']
+
+
 class H2JDBCDriver(AbstractJDBCImplementation):
 
     def __init__(self, conf_properties: Dict[str, str]):
@@ -74,13 +89,28 @@ class H2JDBCDriver(AbstractJDBCImplementation):
         return ['password']
 
 
-class MonetDBLiteDBCDriver(AbstractJDBCImplementation):
-
-    def get_database_system_name(self) -> str:
-        return "MonetDBLite-Java"
+class HSQLDBJDBCDriver(AbstractJDBCImplementation):
 
     def __init__(self, conf_properties: Dict[str, str]):
         super().__init__(conf_properties)
+
+    def get_database_system_name(self) -> str:
+        return "HSQLDB"
+
+    def get_java_driver_class(self) -> str:
+        return "org.hsqldb.jdbc.JDBCDriver"
+
+    def get_supported_properties(self) -> [str]:
+        return ['password']
+
+
+class MonetDBLiteJDBCDriver(AbstractJDBCImplementation):
+
+    def __init__(self, conf_properties: Dict[str, str]):
+        super().__init__(conf_properties)
+
+    def get_database_system_name(self) -> str:
+        return "MonetDBLite-Java"
 
     def get_java_driver_class(self) -> str:
         return "nl.cwi.monetdb.jdbc.MonetDriver"

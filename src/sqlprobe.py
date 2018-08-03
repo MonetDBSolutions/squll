@@ -28,7 +28,8 @@ from actian_client_driver import ActianClientDriver
 from mariadb_driver import MariaDBDriver
 from firebird_driver import FirebirdDriver
 from jdbc.jdbc_driver import JDBCDriver
-from jdbc.jdbc_implementations import ApacheDerbyJDBCDriver, H2JDBCDriver, MonetDBLiteDBCDriver
+from jdbc.jdbc_implementations import ApacheDerbyJDBCDriver, ApacheHiveJDBCDriver, H2JDBCDriver, HSQLDBJDBCDriver, \
+    MonetDBLiteJDBCDriver
 
 parser = argparse.ArgumentParser(
     description='SQLprobe is the experiment driver for SQLscalpel. '
@@ -155,12 +156,16 @@ if __name__ == '__main__':
                         results = MariaDBDriver.run(target, t['query'], )
                     elif target['dbms'].lower() == 'firebird':
                         results = FirebirdDriver.run(target, t['query'], )
-                    elif target['dbms'].lower() == 'h2':
-                        results = JDBCDriver.run(target, t['query'], H2JDBCDriver(target))
                     elif target['dbms'].lower() in ('apache derby', 'derby'):
                         results = JDBCDriver.run(target, t['query'], ApacheDerbyJDBCDriver(target))
+                    elif target['dbms'].lower() in ('apache hive', 'hive'):
+                        results = JDBCDriver.run(target, t['query'], ApacheHiveJDBCDriver(target))
+                    elif target['dbms'].lower() == 'h2':
+                        results = JDBCDriver.run(target, t['query'], H2JDBCDriver(target))
+                    elif target['dbms'].lower() == 'hsqldb':
+                        results = JDBCDriver.run(target, t['query'], HSQLDBJDBCDriver(target))
                     elif target['dbms'].lower() == 'monetdblite-java':
-                        results = JDBCDriver.run(target, t['query'], MonetDBLiteDBCDriver(target))
+                        results = JDBCDriver.run(target, t['query'], MonetDBLiteJDBCDriver(target))
                     # elif args.dbms == 'MonetDBLite-Python'.lower():
                     #   results = MonetDBliteDriver.run(target, t['query'],)
                     else:
