@@ -19,45 +19,7 @@ Experimental, should be filled in.
 import time
 import jaydebeapi
 
-from abc import abstractmethod
-from typing import Dict
-
-
-class AbstractJDBCImplementation:
-
-    def __init__(self, properties: Dict[str, str]):
-        config_keys = ['uri', 'jars', 'user']
-        for c in config_keys:
-            if c not in properties:
-                print('Configuration key "%s" not set in configuration file for target "%s"' % (
-                        c, self.get_database_system_name()))
-                exit(-1)
-        self.uri = properties['uri']
-        self.jars = [x.strip() for x in properties['jars'].split(',')]
-        self.properties = self._compile_jdbc_properties(properties)
-        self.properties['user'] = properties['user']
-        pass
-
-    @abstractmethod
-    def get_database_system_name(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_java_driver_class(self) -> str:
-        pass
-
-    def get_jdbc_uri(self) -> str:
-        return self.uri
-
-    def get_jdbc_jars_path(self) -> [str]:
-        return self.jars
-
-    def get_jdbc_properties(self) -> Dict[str, str]:
-        return self.properties
-
-    @abstractmethod
-    def _compile_jdbc_properties(self, properties: Dict[str, str]) -> Dict[str, str]:
-        pass
+from .jdbc_implementations import AbstractJDBCImplementation
 
 
 class JDBCDriver:
