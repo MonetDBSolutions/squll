@@ -6,7 +6,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright 2016- MonetDB Solutions B.V.
 
 Author: M Kersten
-The tasks are obtained from a webservice. It does not itself provide a web service for inspection.
+The tasks are obtained from the SQLscalpel webservice using a separately supplied
+authorization key.
 """
 import requests
 import json
@@ -16,8 +17,6 @@ import os
 class Connection:
     server = 'localhost:5000/'
     name = None
-    user = None
-    passwd = None
     host = None
     dbms = None
     version = None
@@ -38,7 +37,6 @@ class Connection:
         self.version = target['version']
         self.host = target['host']
         self.server = target['server']
-        self.user = target['user']
         self.key = target['key']
         # construct password hash
         try:
@@ -46,25 +44,9 @@ class Connection:
             self.memory = mem_bytes / (1024. ** 3)
         except:
             pass
-        if 'input' in target and target['input']:
-            # read the input file with experiment records and process them one by one
-            with open(target['input'], 'r') as f:
-                self.tasks = json.loads(f.read())
-                f.close()
-                print('Restored a batch of %d tasks', len(self.tasks))
 
     def get_work(self, target):
         debug = target.getboolean('debug')
-
-        # read from the batch file first
-        if self.tasks and 'input' in target:
-            t = self.tasks[0]
-            self.tasks.remove(0)
-            return t
-        if self.tasks == []:
-            if debug:
-                print('no elements in local task queue')
-            return None
 
         if 'db' in target:
             db = target['db']
@@ -80,8 +62,8 @@ class Connection:
             experiment = '*'
 
         endpoint = 'http://' + self.server + '/get_work'
-        args = {'user': self.user, 'host': self.host, 'dbms': self.dbms, 'version': self.version, 'db': db,
-                'project': project, 'experiment': experiment, 'passwordhash': 0, 'key': key}
+        args = {'key': self.key, 'host': self.host, 'dbms': self.dbms, 'version': self.version, 'db': db,
+                'project': project, 'experiment': experiment, 'passwordhash': 0,}
         if target.getboolean('extras'):
             # also ask for the template and binding table
             args.update({'extras': 'yes'})
@@ -119,7 +101,7 @@ class Connection:
             pass
         endpoint = 'http://' + self.server + '/put_work'
         u = {'exp': task['exp'], 'tag': task['tag'], 'ptag': task['ptag'],'key': self.key,
-             'usr': self.user, 'host': self.host, 'dbms': self.dbms, 'version': self.version,
+             'host': self.host, 'dbms': self.dbms, 'version': self.version,
              'db': task['db'], 'project': task['project'], 'experiment': task['experiment'],
              'query': task['query'].replace("'", "''"),
              'cpucount': os.cpu_count(), 'cpuload': str(self.preload + self.postload).replace("'",""),

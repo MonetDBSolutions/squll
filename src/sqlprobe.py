@@ -41,7 +41,6 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--config', type=str, help='Configuration file to use', default='sqlprobe.conf')
 parser.add_argument('--target', type=str, help='Target system to use', default=None)
-parser.add_argument('--bailout', type=int, help='Stop after errors', default=None)
 parser.add_argument('--stmt', type=str, help='Test query', default=None)
 parser.add_argument('--offline', help='Just collect the queries', action='store_true')
 parser.add_argument('--version', help='Show version info', action='store_true')
@@ -74,7 +73,7 @@ if __name__ == '__main__':
         exit(-1)
 
     # sanity check on the configuration file
-    configkeys = ['home', 'server', 'user', 'db', 'dbms', 'host', 'bailout',
+    configkeys = ['home', 'server', 'key', 'db', 'dbms', 'host', 'bailout',
                   'project', 'experiment', 'repeat', 'debug', 'timeout', ]
     if not args.target:
         configkeys.append('target')
@@ -96,7 +95,6 @@ if __name__ == '__main__':
 
     doit = True
     delay = 5
-    bailout = int(target['bailout'])
 
     while doit:
         doit = False
