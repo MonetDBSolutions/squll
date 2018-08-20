@@ -24,6 +24,7 @@ class Connection:
     tasks = None
     preload = None
     postload = None
+    key = None
     memory = -1
 
     def __init__(self, target,):
@@ -38,6 +39,7 @@ class Connection:
         self.host = target['host']
         self.server = target['server']
         self.user = target['user']
+        self.key = target['key']
         # construct password hash
         try:
             mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
@@ -79,7 +81,7 @@ class Connection:
 
         endpoint = 'http://' + self.server + '/get_work'
         args = {'user': self.user, 'host': self.host, 'dbms': self.dbms, 'version': self.version, 'db': db,
-                'project': project, 'experiment': experiment, 'passwordhash': 0}
+                'project': project, 'experiment': experiment, 'passwordhash': 0, 'key': key}
         if target.getboolean('extras'):
             # also ask for the template and binding table
             args.update({'extras': 'yes'})
@@ -116,11 +118,12 @@ class Connection:
         except os.error:
             pass
         endpoint = 'http://' + self.server + '/put_work'
-        u = {'exp': task['exp'], 'tag': task['tag'], 'ptag': task['ptag'],
+        u = {'exp': task['exp'], 'tag': task['tag'], 'ptag': task['ptag'],'key': self.key,
              'usr': self.user, 'host': self.host, 'dbms': self.dbms, 'version': self.version,
              'db': task['db'], 'project': task['project'], 'experiment': task['experiment'],
              'query': task['query'].replace("'", "''"),
-             'cpucount': os.cpu_count(), 'cpuload': str(self.preload + self.postload).replace("'",""), 'ram': self.memory,
+             'cpucount': os.cpu_count(), 'cpuload': str(self.preload + self.postload).replace("'",""),
+             'ram': self.memory,
              }
 
         results.update(u)
