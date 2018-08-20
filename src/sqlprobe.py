@@ -27,6 +27,9 @@ from sqlite_driver import SqliteDriver
 from actian_client_driver import ActianClientDriver
 from mariadb_driver import MariaDBDriver
 from firebird_driver import FirebirdDriver
+from jdbc.jdbc_driver import JDBCDriver
+from jdbc.jdbc_implementations import ApacheDerbyJDBCDriver, ApacheHiveJDBCDriver, H2JDBCDriver, HSQLDBJDBCDriver, \
+    MonetDBLiteJDBCDriver
 
 parser = argparse.ArgumentParser(
     description='SQLprobe is the experiment driver for SQLscalpel. '
@@ -68,7 +71,7 @@ if __name__ == '__main__':
         target = config[config['DEFAULT']['target']]
 
     if not target:
-        print("Could not find the taget section '%s' in the configuration file '%s'" %
+        print("Could not find the target section '%s' in the configuration file '%s'" %
               (args.target, args.config))
         exit(-1)
 
@@ -137,22 +140,32 @@ if __name__ == '__main__':
                             exit(-1)
                         continue
 
-                    if target['dbms'].startswith('MonetDB'):
-                        results = MonetDBClientDriver.run(target, t['query'],)
-                    # elif args.dbms.startswith('MonetDBlite'):
-                    #   results = MonetDBliteDriver.run(target, t['query'],)
-                    elif target['dbms'].startswith('PostgreSQL'):
+                    if target['dbms'].lower() == 'monetdb':
+                        results = MonetDBClientDriver.run(target, t['query'], )
+                    elif target['dbms'].lower() == 'postgresql':
                         results = PostgresDriver.run(target, t['query'],)
-                    elif target['dbms'].startswith('Clickhouse'):
+                    elif target['dbms'].lower() == 'clickhouse':
                         results = ClickhouseDriver.run(target, t['query'],)
-                    elif target['dbms'].startswith('SQLite'):
+                    elif target['dbms'].lower() == 'sqlite':
                         results = SqliteDriver.run(target, t['query'],)
-                    elif target['dbms'].startswith('Actian'):
+                    elif target['dbms'].lower() == 'actian':
                         results = ActianClientDriver.run(target, t['query'], )
-                    elif target['dbms'].startswith('MariaDB'):
+                    elif target['dbms'].lower() == 'mariadb':
                         results = MariaDBDriver.run(target, t['query'], )
-                    elif target['dbms'].startswith('Firebird'):
-                        results = MariaDBDriver.run(target, t['query'], )
+                    elif target['dbms'].lower() == 'firebird':
+                        results = FirebirdDriver.run(target, t['query'], )
+                    elif target['dbms'].lower() in ('apache derby', 'derby'):
+                        results = JDBCDriver.run(target, t['query'], ApacheDerbyJDBCDriver(target))
+                    elif target['dbms'].lower() in ('apache hive', 'hive'):
+                        results = JDBCDriver.run(target, t['query'], ApacheHiveJDBCDriver(target))
+                    elif target['dbms'].lower() == 'h2':
+                        results = JDBCDriver.run(target, t['query'], H2JDBCDriver(target))
+                    elif target['dbms'].lower() == 'hsqldb':
+                        results = JDBCDriver.run(target, t['query'], HSQLDBJDBCDriver(target))
+                    elif target['dbms'].lower() == 'monetdblite-java':
+                        results = JDBCDriver.run(target, t['query'], MonetDBLiteJDBCDriver(target))
+                    # elif args.dbms == 'MonetDBLite-Python'.lower():
+                    #   results = MonetDBliteDriver.run(target, t['query'],)
                     else:
                         results = None
                         print('Undefined target platform', target['dbms'])

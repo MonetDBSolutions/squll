@@ -36,11 +36,15 @@ class MonetDBliteDriver:
         debug = target.getboolean('debug')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
+        conn = None
         try:
             print('Running on ', dbms, ':', query)
             conn = monetdblite.connect('sqlite/' + db + '.db', timeout=timeout)
         except monetdblite.DatabaseError as msg:
             print('EXCEPTION ', msg)
+            if conn is not None:
+                conn.close()
+                print('Database connection closed.')
             return response
 
         if debug:
@@ -60,6 +64,7 @@ class MonetDBliteDriver:
             except monetdblite.DatabaseError as msg:
                 print('EXCEPTION ', i, msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")
+                conn.close()
                 return response
 
             response['times'].append(ticks)
@@ -67,4 +72,5 @@ class MonetDBliteDriver:
 
         if debug:
             print(response)
+        conn.close()
         return response

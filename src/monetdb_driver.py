@@ -40,7 +40,6 @@ class MonetDBDriver:
         conn = None
         try:
             conn = pymonetdb.connect()
-            c = conn.cursor()
         except (Exception, pymonetdb.DatabaseError()) as msg:
             print('EXCEPTION ', msg)
             if conn is not None:
@@ -65,8 +64,11 @@ class MonetDBDriver:
             except (Exception, pymonetdb.DatabaseError) as msg:
                 print('EXCEPTION ', msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'","''")
+                conn.close()
                 return None
 
             response['times'].append(ticks)
             response['clock'].append(nu)
+
+        conn.close()
         return response

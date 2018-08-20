@@ -19,32 +19,36 @@ Experimental, should be filled in.
 import time
 import jaydebeapi
 
+from .jdbc_implementations import AbstractJDBCImplementation
+
+
 class JDBCDriver:
 
     def __init__(self):
         pass
 
     @staticmethod
-    def run(target, query):
+    def run(target, query, implementation: AbstractJDBCImplementation):
         """
         The number of repetitions is used to derive the best-of value.
         :param target:
         :param query:
+        :param implementation: A JDBC implementation Python class
         :return:
         """
         db = target['db']
+        jdbc_uri = implementation.get_jdbc_uri().format(database=db)
         repeat = int(target['repeat'])
         debug = target.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
         conn = None
         try:
-            conn = jaydebeapi.connect("org.hsqldb.jdbcDriver",  # JDBC library name
-                                      "jdbc:hsqldb:mem:.",      # url
-                                      ["SA", ""],
-                                      "/path/to/hsqldb.jar",)   # location of library
+            conn = jaydebeapi.connect(implementation.get_java_driver_class(),  # JDBC library class
+                                      jdbc_uri,                                # JDBC uri
+                                      implementation.get_jdbc_properties(),    # properties for the driver
+                                      implementation.get_jdbc_jars_path())     # location of the jar
         except (Exception, jaydebeapi.DatabaseError) as msg:
-            print('CONNECTION:', 'localhost', 5432, db)
             print('EXCEPTION :', msg)
             if conn is not None:
                 conn.close()
@@ -65,11 +69,14 @@ class JDBCDriver:
                 print('ticks', ticks)
                 c.close()
 
-            except (Exception, psycopg2.DatabaseError) as msg:
-                print('EXCEPTION ', i, msg)
+            except Exception as msg:
+                print('EXCEPTION :', i, msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")
+                conn.close()
                 return response
 
             response['times'].append(ticks)
             response['clock'].append(nu)
+
+        conn.close()
         return response

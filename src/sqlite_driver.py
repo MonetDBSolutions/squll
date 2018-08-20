@@ -35,11 +35,15 @@ class SqliteDriver:
         debug = target.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
+        conn = None
         try:
             conn = sqlite3.connect(target['dbfarm'] + db + '.db', timeout=timeout)
         except sqlite3.DatabaseError as msg:
             print('EXCEPTION ', msg)
             print(target['dbfarm'] + db + '.db')
+            if conn is not None:
+                conn.close()
+                print('Database connection closed.')
             return response
 
         if debug:
@@ -58,8 +62,11 @@ class SqliteDriver:
             except sqlite3.DatabaseError as msg:
                 print('EXCEPTION ', i, msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")
+                conn.close()
                 return response
 
             response['times'].append(ticks)
             response['clock'].append(nu)
+
+        conn.close()
         return response
