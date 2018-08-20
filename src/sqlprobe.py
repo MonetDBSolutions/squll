@@ -17,23 +17,23 @@ A number of pre-defined driver programs are included for inspiration.
 import argparse
 import time
 from connection import Connection
-from monetdb_driver import MonetDBDriver
 import configparser
-from monetdb_client_driver import MonetDBClientDriver
+from clients.monetdb_driver import MonetDBDriver
+from clients.monetdb_client_driver import MonetDBClientDriver
 # from probe.monetdblite_driver import MonetDBliteDriver
-from clickhouse_driver import ClickhouseDriver
-from postgres_driver import PostgresDriver
-from sqlite_driver import SqliteDriver
-from actian_client_driver import ActianClientDriver
-from mariadb_driver import MariaDBDriver
-from firebird_driver import FirebirdDriver
+from clients.clickhouse_driver import ClickhouseDriver
+from clients.postgres_driver import PostgresDriver
+from clients.sqlite_driver import SqliteDriver
+from clients.actian_client_driver import ActianClientDriver
+from clients.mariadb_driver import MariaDBDriver
+from clients.firebird_driver import FirebirdDriver
 from jdbc.jdbc_driver import JDBCDriver
 from jdbc.jdbc_implementations import ApacheDerbyJDBCDriver, ApacheHiveJDBCDriver, H2JDBCDriver, HSQLDBJDBCDriver, \
     MonetDBLiteJDBCDriver
 
 parser = argparse.ArgumentParser(
     description='SQLprobe is the experiment driver for SQLscalpel. '
-                'It requires an account on SQLscalpel and being a member of the team associated with a project.'
+                'It requires an account on SQLscalpel and being a member of the team associated with a project. '
                 'SQLprobe should be started on each machine you want to experiment with. '
                 'The details of running the experiment can be kept private. '
                 'However, the query text is provided by the server and the results '
