@@ -100,7 +100,7 @@ class Connection:
         except os.error:
             pass
         endpoint = 'http://' + self.server + '/put_work'
-        u = {'exp': task['exp'], 'tag': task['tag'], 'ptag': task['ptag'],'key': self.key,
+        u = {'run': task['run'], 'tag': task['tag'], 'ptag': task['ptag'],'key': self.key,
              'host': self.host, 'dbms': self.dbms, 'version': self.version,
              'db': task['db'], 'project': task['project'], 'experiment': task['experiment'],
              'query': task['query'].replace("'", "''"),

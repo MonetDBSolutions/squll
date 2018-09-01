@@ -42,10 +42,10 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.HelpFormatter)
 
 
-parser.add_argument('--config', type=str, help='Configuration file to use', default='sqlprobe.conf')
+parser.add_argument('--config', type=str, help='Configuration file to use', default='./sqlprobe.conf')
 parser.add_argument('--target', type=str, help='Target system to use', default=None)
+parser.add_argument('--key', type=str, help='Contributor key', default=None)
 parser.add_argument('--stmt', type=str, help='Test query', default=None)
-parser.add_argument('--offline', help='Just collect the queries', action='store_true')
 parser.add_argument('--version', help='Show version info', action='store_true')
 
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         exit(-1)
 
     # sanity check on the configuration file
-    configkeys = ['home', 'server', 'key', 'db', 'dbms', 'host', 'bailout',
+    configkeys = ['server', 'key', 'db', 'dbms', 'host', 'bailout',
                   'project', 'experiment', 'repeat', 'debug', 'timeout', ]
     if not args.target:
         configkeys.append('target')
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     doit = True
     delay = 5
-
+    bailout = 0
     while doit:
         doit = False
         for db in dblist:
@@ -114,11 +114,6 @@ if __name__ == '__main__':
                     print('Lost connection with SQLscalpel server')
                     if not target.getboolean('forever'):
                         exit(-1)
-                if args.offline:
-                    # collect all work in a local file for post processing.
-                    for x in tasks:
-                        print('task:',x)
-                    continue
 
                 # If we don't get any work we either should stop or wait for it
                 if tasks is None:
