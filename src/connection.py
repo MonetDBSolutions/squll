@@ -63,7 +63,7 @@ class Connection:
 
         endpoint = 'http://' + self.server + '/get_work'
         args = {'key': self.key, 'host': self.host, 'dbms': self.dbms, 'version': self.version, 'db': db,
-                'project': project, 'experiment': experiment, 'passwordhash': 0,}
+                'project': project, 'experiment': experiment, 'passwordhash': 0, 'branch':'master'}
         if target.getboolean('extras'):
             # also ask for the template and binding table
             args.update({'extras': 'yes'})
@@ -103,7 +103,7 @@ class Connection:
         u = {'run': task['run'], 'tag': task['tag'], 'ptag': task['ptag'],'key': self.key,
              'host': self.host, 'dbms': self.dbms, 'version': self.version,
              'db': task['db'], 'project': task['project'], 'experiment': task['experiment'],
-             'query': task['query'].replace("'", "''"),
+             'query': task['query'].replace("'", "''"), 'branch': task['branch'],
              'cpucount': os.cpu_count(), 'cpuload': str(self.preload + self.postload).replace("'",""),
              'ram': self.memory,
              }
