@@ -1,7 +1,7 @@
-# SQLprobes
+# Sqalpel
 
 ## Description
-SQLprobes is the collection of driver programs for performance experiments against a DBMS.
+Sqalpel is the collection of driver programs for performance experiments against a DBMS.
 For background information see the paper [Discrimative Performance Benchmarking](https://www.cwi.nl/~mk/scalpel.pdf).
 
 ## Installation
@@ -15,20 +15,20 @@ If you do a user installation, you will need to add the right folder to your PAT
   export PATH="$PATH:$PYTHON_BIN_PATH"
   which pipenv
 ```
-Thereafter you can checkout the SQLprobes repository in a local directory.
+Thereafter you can checkout the Sqalpel repository in a local directory.
 ```
-  git clone git@github.com:MonetDBSolutions/sqlprobes.git
-  cd sqlprobes
+  git clone git@github.com:MonetDBSolutions/sqalpel.git
+  cd sqalpel
   pipenv install --ignore-pipfile
   pipenv shell
 ```
 
 ## Usage
-The driver program reads a configuration file 'sqlprobe.conf' from the directory in which
+The driver program reads a configuration file 'sqalpel.conf' from the directory in which
 it is started. A sample is included for inspiration and documentation. Make sure that the
 global parameters are set correctly.
 
-SQLprobe is started with a target name, which corresponds to a section
+Sqalpel is started with a target name, which corresponds to a section
 in the configuration file. That section may contain DBMS specific
 parameter settings.
 
@@ -49,7 +49,7 @@ owner can discard any suspicious result or decline contributions.
 
 
 ## Credits
-SQLprobes and SQLscalpel are orginally developed by Martin Kersten.
+Sqalpel.py and Sqalpel.io are orginally developed by Martin Kersten.
 
 ## License
 

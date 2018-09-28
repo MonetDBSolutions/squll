@@ -32,9 +32,9 @@ from jdbc.jdbc_implementations import ApacheDerbyJDBCDriver, ApacheHiveJDBCDrive
     MonetDBLiteJDBCDriver
 
 parser = argparse.ArgumentParser(
-    description='SQLprobe is the experiment driver for SQLscalpel. '
-                'It requires an account on SQLscalpel and being a member of the team associated with a project. '
-                'SQLprobe should be started on each machine you want to experiment with. '
+    description='Sqalpel.py is the experiment driver for Sqalpel.io. '
+                'It requires an account on Sqalpel.io and being a member of the team associated with a project. '
+                'Sqalpel should be started on each machine you want to experiment with. '
                 'The details of running the experiment can be kept private. '
                 'However, the query text is provided by the server and the results '
                 'are identified by the target name for comparison later.',
@@ -42,7 +42,7 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.HelpFormatter)
 
 
-parser.add_argument('--config', type=str, help='Configuration file to use', default='./sqlprobe.conf')
+parser.add_argument('--config', type=str, help='Configuration file to use', default='./sqalpel.conf')
 parser.add_argument('--target', type=str, help='Target system to use', default=None)
 parser.add_argument('--key', type=str, help='Contributor key', default=None)
 parser.add_argument('--stmt', type=str, help='Test query', default=None)
@@ -52,7 +52,7 @@ parser.add_argument('--version', help='Show version info', action='store_true')
 if __name__ == '__main__':
     args = parser.parse_args()
     if args.version:
-        print('SQLprobe Version 0.2')
+        print('Sqalpel Version 0.3')
 
     # the configuration file is consider local
     config = configparser.ConfigParser()
@@ -84,7 +84,7 @@ if __name__ == '__main__':
         if c not in target:
             print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
             exit(-1)
-    # Connect to the SQLscalpel webserver
+    # Connect to the sqalpel.io webserver
     conn = None
     if not args.stmt:
         conn = Connection(target)
@@ -111,7 +111,7 @@ if __name__ == '__main__':
                 else:
                     tasks = conn.get_work(target)
                 if tasks is None:
-                    print('Lost connection with SQLscalpel server')
+                    print('Lost connection with Sqalpel.io server')
                     if not target.getboolean('forever'):
                         exit(-1)
 
