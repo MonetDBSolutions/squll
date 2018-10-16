@@ -1,7 +1,7 @@
-# Sqalpel
+# SQalpeL
 
 ## Description
-Sqalpel is the collection of driver programs for performance experiments against a DBMS.
+SQalpeL is the collection of driver programs for performance experiments against a DBMS.
 For background information see the paper [Discrimative Performance Benchmarking](https://www.cwi.nl/~mk/scalpel.pdf).
 
 ## Installation
@@ -15,20 +15,20 @@ If you do a user installation, you will need to add the right folder to your PAT
   export PATH="$PATH:$PYTHON_BIN_PATH"
   which pipenv
 ```
-Thereafter you can checkout the Sqalpel repository in a local directory.
+Thereafter you can checkout the SQalpeL repository in a local directory.
 ```
-  git clone git@github.com:MonetDBSolutions/sqalpel.git
-  cd sqalpel
+  git clone git@github.com:MonetDBSolutions/SQalpeL.git
+  cd SQalpeL
   pipenv install --ignore-pipfile
   pipenv shell
 ```
 
 ## Usage
-The driver program reads a configuration file 'sqalpel.conf' from the directory in which
+The driver program reads a configuration file 'SQalpeL.conf' from the directory in which
 it is started. A sample is included for inspiration and documentation. Make sure that the
 global parameters are set correctly.
 
-Sqalpel is started with a target name, which corresponds to a section
+SQalpeL is started with a target name, which corresponds to a section
 in the configuration file. That section may contain DBMS specific
 parameter settings.
 
@@ -49,7 +49,7 @@ owner can discard any suspicious result or decline contributions.
 
 
 ## Credits
-Sqalpel.py and Sqalpel.io are orginally developed by Martin Kersten.
+SQalpeL.py and SQalpeL.io are orginally developed by Martin Kersten.
 
 ## License
 

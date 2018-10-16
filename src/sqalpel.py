@@ -7,7 +7,7 @@ Copyright 2016- MonetDB Solutions B.V.
 
 Author: M Kersten
 This program is intended to be ran on a target experimentation platform.
-It contacts the SQLscalpel webserver for tasks to be executed and
+It contacts the SQalpeL.io webserver for tasks to be executed and
 deploys a local (private) program to collect the measurements.
 
 A number of pre-defined driver programs are included for inspiration.
@@ -32,9 +32,9 @@ from jdbc.jdbc_implementations import ApacheDerbyJDBCDriver, ApacheHiveJDBCDrive
     MonetDBLiteJDBCDriver
 
 parser = argparse.ArgumentParser(
-    description='Sqalpel.py is the experiment driver for Sqalpel.io. '
-                'It requires an account on Sqalpel.io and being a member of the team associated with a project. '
-                'Sqalpel should be started on each machine you want to experiment with. '
+    description='SQalpeL.py is the experiment driver for SQalpeL.io. '
+                'It requires an account on SQalpeL.io and being a member of the team associated with a project. '
+                'SQalpeL should be started on each machine you want to experiment with. '
                 'The details of running the experiment can be kept private. '
                 'However, the query text is provided by the server and the results '
                 'are identified by the target name for comparison later.',
@@ -52,7 +52,7 @@ parser.add_argument('--version', help='Show version info', action='store_true')
 if __name__ == '__main__':
     args = parser.parse_args()
     if args.version:
-        print('Sqalpel Version 0.3')
+        print('SQalpeL Version 0.3')
 
     # the configuration file is consider local
     config = configparser.ConfigParser()
@@ -84,7 +84,7 @@ if __name__ == '__main__':
         if c not in target:
             print('Configuration key "%s" not set in configuration file for target "%s"' % (c, args.target))
             exit(-1)
-    # Connect to the sqalpel.io webserver
+    # Connect to the SQalpeL.io webserver
     conn = None
     if not args.stmt:
         conn = Connection(target)

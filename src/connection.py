@@ -6,7 +6,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright 2016- MonetDB Solutions B.V.
 
 Author: M Kersten
-The tasks are obtained from the SQLscalpel webservice using a separately supplied
+The tasks are obtained from the SQalpeL webservice using a separately supplied
 authorization key.
 """
 import requests
@@ -24,7 +24,7 @@ class Connection:
     preload = None
     postload = None
     key = None
-    memory = -1111
+    memory = 0
 
     def __init__(self, target,):
         """
