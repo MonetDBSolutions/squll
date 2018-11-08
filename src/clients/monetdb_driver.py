@@ -39,7 +39,7 @@ class MonetDBDriver:
 
         conn = None
         try:
-            conn = pymonetdb.connect()
+            conn = pymonetdb.connect(database=db)
         except (Exception, pymonetdb.DatabaseError()) as msg:
             print('EXCEPTION ', msg)
             if conn is not None:

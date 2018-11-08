@@ -32,11 +32,11 @@ from jdbc.jdbc_implementations import ApacheDerbyJDBCDriver, ApacheHiveJDBCDrive
     MonetDBLiteJDBCDriver
 
 parser = argparse.ArgumentParser(
-    description='SQalpeL.py is the experiment driver for SQalpeL.io. '
-                'It requires an account on SQalpeL.io and being a member of the team associated with a project. '
-                'SQalpeL should be started on each machine you want to experiment with. '
-                'The details of running the experiment can be kept private. '
-                'However, the query text is provided by the server and the results '
+    description='sqalpel.py is the experiment driver for SQALPEL.io. '
+                'It requires an account on SQALPEL.io and being a member of the team associated with a project. '
+                'SQALPEL should be started on each machine you want to perform experiment. '
+                'The program can be easily modified to keep details of running the experiment private. '
+                'The query text is provided by the server and the results '
                 'are identified by the target name for comparison later.',
     epilog='''For more information see: [paper]''',
     formatter_class=argparse.HelpFormatter)
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     target = None
     if args.target and args.target in config:
         target = config[args.target]
-    elif 'target' in config['DEFAULT']:
+    elif 'target' in config['DEFAULT'] and config['DEFAULT']['target'] in config:
         target = config[config['DEFAULT']['target']]
 
     if not target:
