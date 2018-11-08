@@ -58,8 +58,8 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     try:
         config.read(args.config)
-    except:
-        print('Could not find the configuration file')
+    except Exception as msg:
+        print('Error in parsing ', args.config, msg)
         exit(-1)
 
     # print('CONFIG SECTIONS', config.sections())
