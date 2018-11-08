@@ -112,8 +112,7 @@ if __name__ == '__main__':
                     tasks = conn.get_work(target)
                 if tasks is None:
                     print('Lost connection with Sqalpel.io server')
-                    if not target.getboolean('forever'):
-                        exit(-1)
+                    exit(-1)
 
                 # If we don't get any work we either should stop or wait for it
                 if tasks is None:
