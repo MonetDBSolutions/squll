@@ -1,7 +1,7 @@
-# SQalpeL
+# SQALPEL
 
 ## Description
-SQalpeL is the collection of driver programs for performance experiments against a DBMS.
+SQALPEL is the collection of driver programs for performance experiments against a DBMS.
 For background information see the paper [Discrimative Performance Benchmarking](https://www.cwi.nl/~mk/scalpel.pdf).
 
 ## Installation
@@ -15,7 +15,7 @@ If you do a user installation, you will need to add the right folder to your PAT
   export PATH="$PATH:$PYTHON_BIN_PATH"
   which pipenv
 ```
-Thereafter you can checkout the SQalpeL repository in a local directory.
+Thereafter you can checkout the SQALPEL repository in a local directory.
 ```
   git clone git@github.com:MonetDBSolutions/SQalpeL.git
   cd SQalpeL
@@ -24,11 +24,11 @@ Thereafter you can checkout the SQalpeL repository in a local directory.
 ```
 
 ## Usage
-The driver program reads a configuration file 'SQalpeL.conf' from the directory in which
+The driver program reads a configuration file 'sqalpel.conf' from the directory in which
 it is started. A sample is included for inspiration and documentation. Make sure that the
 global parameters are set correctly.
 
-SQalpeL is started with a target name, which corresponds to a section
+SQALPEL is started with a target name, which corresponds to a section
 in the configuration file. That section may contain DBMS specific
 parameter settings.
 
@@ -37,19 +37,19 @@ Either queries for a specific project are ran, or even specific experiments with
 The most generous way is to accept any task, as indicated with
 the pseudo project '*' and pseudo experiment '*'.
 
-Once started, it continuously requests queries from the SQLscalpel
+Once started, it continuously requests queries from the SQALPEL
 server to contribute with execution times (in ms) of a number of runs.
 
 ## Policy
 Recall that all experiments should be ran in good faith with
 the intentions provided by the project owner. In particular,
 the parameter setting of the DBMS and OS should comply with
-those recorded for them in the SQLscalpel website. The project
+those recorded for them in the SQALPEL website. The project
 owner can discard any suspicious result or decline contributions.
 
 
 ## Credits
-SQalpeL.py and SQalpeL.io are orginally developed by Martin Kersten.
+sqalpel.py is orginally developed by Martin Kersten.
 
 ## License
 
