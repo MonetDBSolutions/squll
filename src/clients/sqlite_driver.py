@@ -56,6 +56,7 @@ class SqliteDriver:
                 c = conn.cursor()
                 ticks = time.time()
                 c.execute(query)
+                response['answer'] = 'No answer'
                 ticks = int((time.time() - ticks) * 1000)
                 print('ticks', ticks)
                 c.close()

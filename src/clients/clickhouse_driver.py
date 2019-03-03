@@ -55,6 +55,7 @@ class ClickhouseDriver:
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
                 proc = subprocess.run(args, timeout=timeout, check=True, stdout=out, stderr=err)
+                response['answer'] = 'No answer'
             except subprocess.SubprocessError as msg:
                 print('EXCEPTION ', i, msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")

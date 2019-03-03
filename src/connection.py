@@ -15,29 +15,31 @@ import os
 
 
 class Connection:
-    server = 'localhost:5000/'
+    server = 'localhost:5000'
     name = None
     host = None
     dbms = None
-    version = None
     tasks = None
+    query = None
+    extras = None
     preload = None
     postload = None
-    key = None
+    ticket = None
     memory = 0
 
-    def __init__(self, target,):
+    def __init__(self, section,):
         """
         Contact the sql server and gather some basic information of the platform to identify the platform results.
         :param newroot:
         :param key:
         :return:
         """
-        self.dbms = target['dbms']
-        self.version = target['version']
-        self.host = target['host']
-        self.server = target['server']
-        self.key = target['key']
+
+        self.server = section['server']
+        self.ticket = section['ticket']
+        self.repeat = section['repeat']
+        self.timeout = section['timeout']
+        self.debug = section.getboolean('debug')
         # construct password hash
         try:
             mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
@@ -48,25 +50,13 @@ class Connection:
     def get_work(self, target):
         debug = target.getboolean('debug')
 
-        if 'db' in target:
-            db = target['db']
-        else:
-            db = '*'
-        if 'project' in target:
-            project = target['project']
-        else:
-            project = '*'
-        if 'experiment' in target:
-            experiment = target['experiment']
-        else:
-            experiment = '*'
-
         endpoint = 'http://' + self.server + '/get_work'
-        args = {'key': self.key, 'host': self.host, 'dbms': self.dbms, 'version': self.version, 'db': db,
-                'project': project, 'experiment': experiment}
+        args = {'ticket': self.ticket}
+        print('Ticket used', self.ticket)
+
         if target.getboolean('extras'):
             # also ask for the template and binding table
-            args.update({'extras': 'yes'})
+            args.update({'extras': ['template', 'binding']})
 
         response = ''
         try:
@@ -88,6 +78,13 @@ class Connection:
         if debug:
             print('Task received:', task)
         self.preload = [ "%.3f" % v for v in list(os.getloadavg())]
+        if 'db' in task:
+            self.dbms = task['db']
+            self.dbms = task['dbms']
+            self.host = task['host']
+            self.query = task['query']
+            self.extras = task['extras']
+        task.update( {'repeat': self.repeat, 'timeout': self.timeout, 'debug': self.debug})
         return task
 
     def put_work(self, task, results, debug):
@@ -100,10 +97,9 @@ class Connection:
         except os.error:
             pass
         endpoint = 'http://' + self.server + '/put_work'
-        u = {'tag': task['tag'], 'ptag': task['ptag'],'key': self.key,
-             'host': self.host, 'dbms': self.dbms, 'version': self.version,
-             'db': task['db'], 'project': task['project'], 'experiment': task['experiment'],
-             'query': task['query'].replace("'", "''"),
+        u = { 'ticket': self.ticket,
+             'db': task['db'],  'dbms': self.dbms,  'host': self.host,
+             'project': task['project'], 'experiment': task['experiment'], 'tag': task['tag'],
              'cpucount': os.cpu_count(), 'cpuload': str(self.preload + self.postload).replace("'",""),
              'ram': self.memory,
              }

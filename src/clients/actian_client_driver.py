@@ -64,6 +64,7 @@ class ActianClientDriver:
                     nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
                     ms = datetime.datetime.now()
                     proc = subprocess.run(args, timeout=timeout, check=True, stdin=queryfile, stdout=out, stderr=err)
+                    response['answer'] = 'No answer'
                     ms = datetime.datetime.now() - ms
                 except subprocess.SubprocessError as msg:
                     # a timeout should also stop the database process involved the hard way

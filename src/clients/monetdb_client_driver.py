@@ -26,17 +26,18 @@ class MonetDBClientDriver:
         pass
 
     @staticmethod
-    def run(target, query):
+    def run(task):
         """
         The number of repetitions is used to derive the best-of value.
-        :param target:
+        :param task:
         :param query:
         :return:
         """
-        db = target['db']
-        repeat = int(target['repeat'])
-        timeout = int(target['timeout'])
-        debug = target.getboolean('debug')
+        db = task['db']
+        query = task['query']
+        repeat = int(task['repeat'])
+        timeout = int(task['timeout'])
+        debug = task['debug']
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
 
         action = 'mclient -d {database} -tperformance -ftrash -s "{query}"'
@@ -57,6 +58,7 @@ class MonetDBClientDriver:
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
                 proc = subprocess.run(args, timeout=timeout, check=True, stdout=out, stderr=err)
+                response['answer'] = 'No answer'
             except subprocess.SubprocessError as msg:
                 # a timeout should also stop the database process involved the hard way
                 print('EXCEPTION ', i,  msg)

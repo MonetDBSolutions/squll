@@ -61,6 +61,7 @@ class MariaDBDriver:
                 c= conn.cursor()
                 ms = datetime.datetime.now()
                 c.execute(query)
+                response['answer'] = 'No answer'
                 ms = datetime.datetime.now() - ms
             except mysql.connector.DatabaseError as msg:
                 # a timeout should also stop the database process involved the hard way
