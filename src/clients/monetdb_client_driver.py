@@ -35,7 +35,7 @@ class MonetDBClientDriver:
         """
         db = task['db']
         query = task['query']
-        repeat = int(task['repeat'])
+        runlength = int(task['runlength'])
         timeout = int(task['timeout'])
         debug = task['debug']
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
@@ -54,7 +54,7 @@ class MonetDBClientDriver:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
             print('Run query:', nu, ':',  query)
 
-        for i in range(repeat):
+        for i in range(runlength):
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
                 proc = subprocess.run(args, timeout=timeout, check=True, stdout=out, stderr=err)

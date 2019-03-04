@@ -31,7 +31,7 @@ class PostgresDriver:
         :return:
         """
         db = target['db']
-        repeat = int(target['repeat'])
+        runlength = int(target['runlength'])
         debug = target.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 

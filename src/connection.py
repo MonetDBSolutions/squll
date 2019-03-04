@@ -25,6 +25,7 @@ class Connection:
     preload = None
     postload = None
     ticket = None
+    runlength = None
     memory = 0
 
     def __init__(self, section,):
@@ -37,7 +38,7 @@ class Connection:
 
         self.server = section['server']
         self.ticket = section['ticket']
-        self.repeat = section['repeat']
+        self.runlength = section['runlength']
         self.timeout = section['timeout']
         self.debug = section.getboolean('debug')
         # construct password hash

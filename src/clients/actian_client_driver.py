@@ -35,7 +35,7 @@ class ActianClientDriver:
         :return:
         """
         db = target['db']
-        repeat = int(target['repeat'])
+        runlength = int(target['runlength'])
         timeout = int(target['timeout'])
         debug = False # target.getboolean('debug')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
@@ -54,7 +54,7 @@ class ActianClientDriver:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
             print('Run query:', nu, ':',  query)
 
-        for i in range(repeat):
+        for i in range(runlength):
             with tempfile.TemporaryFile() as queryfile:
                 queryfile.write(query.encode('utf-8'))
                 queryfile.write("\\g".encode('utf-8'))

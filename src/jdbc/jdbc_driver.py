@@ -38,7 +38,7 @@ class JDBCDriver:
         """
         db = target['db']
         jdbc_uri = implementation.get_jdbc_uri().format(database=db)
-        repeat = int(target['repeat'])
+        runlength = int(target['runlength'])
         debug = target.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
@@ -59,7 +59,7 @@ class JDBCDriver:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
             print('Run query:', nu, ':', query)
 
-        for i in range(repeat):
+        for i in range(runlength):
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
                 c = conn.cursor()

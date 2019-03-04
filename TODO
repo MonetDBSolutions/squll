@@ -1,9 +1,6 @@
 [NEED TO HAVE]
-protect against fake results by validation of the experimenter as registered user
-use a unique hash tag to mark the query sent and answer received
-improve authorization of an experimenter.
-return a version id and/or details for the driver being used.
-
+Add a single answer row
+Query modifiers based on generators
 
 implement Mongodb probe
 implement Hive probe

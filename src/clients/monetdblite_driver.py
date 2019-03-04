@@ -31,7 +31,7 @@ class MonetDBliteDriver:
         """
         db = target['db']
         dbms = target['dbms']
-        repeat = int(target['repeat'])
+        runlength = int(target['runlength'])
         timeout = int(target['timeout'])
         debug = target.getboolean('debug')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
@@ -51,7 +51,7 @@ class MonetDBliteDriver:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
             print('Run query:', nu, ':', query)
 
-        for i in range(repeat + 1):
+        for i in range(runlength + 1):
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
                 c = conn.cursor()

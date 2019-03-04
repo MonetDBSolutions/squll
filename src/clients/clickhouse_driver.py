@@ -32,7 +32,7 @@ class ClickhouseDriver:
         :return:
         """
         db = target['db']
-        repeat = int(target['repeat'])
+        runlength = int(target['runlength'])
         timeout = int(target['timeout'])
         debug = target.getboolean('debug')
         response = {'error': '', 'times': [], 'clock': []}
@@ -51,7 +51,7 @@ class ClickhouseDriver:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
             print('Run query:', nu, ':', query)
 
-        for i in range(repeat):
+        for i in range(runlength):
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
                 proc = subprocess.run(args, timeout=timeout, check=True, stdout=out, stderr=err)

@@ -35,7 +35,7 @@ class MariaDBDriver:
         """
         db = target['db']
         socket = target['dbsocket']
-        repeat = int(target['repeat'])
+        runlength = int(target['runlength'])
         timeout = int(target['timeout'])
         debug = target.getboolean('debug')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
@@ -55,7 +55,7 @@ class MariaDBDriver:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
             print('Run query:', nu, ':',  query)
 
-        for i in range(repeat):
+        for i in range(runlength):
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
                 c= conn.cursor()

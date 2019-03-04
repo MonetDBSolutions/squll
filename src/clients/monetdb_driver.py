@@ -33,7 +33,7 @@ class MonetDBDriver:
         :return:
         """
         db = target['db']
-        repeat = int(target['repeat'])
+        runlength = int(target['runlength'])
         debug = target.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
 
@@ -51,7 +51,7 @@ class MonetDBDriver:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
             print('Run query:', nu, ':', query)
 
-        for i in range(repeat):
+        for i in range(runlength):
             try:
                 nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
                 c = conn.cursor()
