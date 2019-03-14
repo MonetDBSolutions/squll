@@ -3,7 +3,7 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0.  If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Copyright 2016- MonetDB Solutions B.V.
+Copyright 2019- Stichting Sqalpel
 
 Author: M Kersten
 The tasks are obtained from the SQalpeL webservice using a separately supplied
@@ -15,17 +15,10 @@ import os
 
 
 class Connection:
+    # keep just enough information to contact the web server
+    # and some session based
     server = 'localhost:5000'
-    name = None
-    host = None
-    dbms = None
-    tasks = None
-    query = None
-    extras = None
-    preload = None
-    postload = None
     ticket = None
-    runlength = None
     memory = 0
 
     def __init__(self, section,):
@@ -38,7 +31,6 @@ class Connection:
 
         self.server = section['server']
         self.ticket = section['ticket']
-        self.runlength = section['runlength']
         self.timeout = section['timeout']
         self.debug = section.getboolean('debug')
         # construct password hash
@@ -73,19 +65,15 @@ class Connection:
 
         if response.status_code != 200:
             return None
+
         task = json.loads(response.content)
         if not task:
             print('No tasks available for the target section', json.dumps(args, sort_keys=True, indent=4))
         if debug:
             print('Task received:', task)
-        self.preload = [ "%.3f" % v for v in list(os.getloadavg())]
-        if 'db' in task:
-            self.dbms = task['db']
-            self.dbms = task['dbms']
-            self.host = task['host']
-            self.query = task['query']
-            self.extras = task['extras']
-        task.update( {'repeat': self.repeat, 'timeout': self.timeout, 'debug': self.debug})
+        if 'params' in task:
+            task['params'] = json.loads(task['params'])
+        task.update( {'timeout': self.timeout, 'debug': self.debug})
         return task
 
     def put_work(self, task, results, debug):
@@ -93,18 +81,14 @@ class Connection:
             if debug:
                 print('Missing result object')
             return None
-        try:
-            self.postload = [ "%.3f" % v for v in list(os.getloadavg())]
-        except os.error:
-            pass
+
         endpoint = 'http://' + self.server + '/put_work'
-        u = { 'ticket': self.ticket,
-             'db': task['db'],  'dbms': self.dbms,  'host': self.host,
+        u = { 'ticket': task['ticket'],
+             'db': task['db'],  'dbms': task['dbms'],  'host': task['host'],
              'project': task['project'], 'experiment': task['experiment'], 'tag': task['tag'],
-             'cpucount': os.cpu_count(), 'cpuload': str(self.preload + self.postload).replace("'",""),
+             'cpucount': os.cpu_count(),
              'ram': self.memory,
              }
-
         results.update(u)
         response = ''
         try:

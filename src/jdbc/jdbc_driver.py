@@ -3,7 +3,7 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0.  If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Copyright 2018- MonetDB Solutions B.V.
+Copyright 2019- Stichting Sqalpel
 
 Author: M Kersten
 
@@ -18,6 +18,7 @@ Experimental, should be filled in.
 
 import time
 import jaydebeapi
+import os
 
 from .jdbc_implementations import AbstractJDBCImplementation
 
@@ -28,15 +29,16 @@ class JDBCDriver:
         pass
 
     @staticmethod
-    def run(target, query, implementation: AbstractJDBCImplementation):
+    def run(target, implementation: AbstractJDBCImplementation):
         """
         The number of repetitions is used to derive the best-of value.
         :param target:
-        :param query:
         :param implementation: A JDBC implementation Python class
         :return:
         """
         db = target['db']
+        query = target['query']
+        params = target['params']
         jdbc_uri = implementation.get_jdbc_uri().format(database=db)
         runlength = int(target['runlength'])
         debug = target.getboolean('trace')
@@ -79,6 +81,11 @@ class JDBCDriver:
 
             response['times'].append(ticks)
             response['clock'].append(nu)
-
+        try:
+            postload = [ "%.3f" % v for v in list(os.getloadavg())]
+        except os.error:
+            postload = 0
+            pass
+        response['cpuload'] = str(preload + postload).replace("'", "")
         conn.close()
         return response

@@ -3,7 +3,7 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0.  If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Copyright 2018- MonetDB Solutions B.V.
+Copyright 2019- Stichting Sqalpel
 
 Author: M Kersten
 
@@ -14,6 +14,7 @@ The result is a dictionary with at least the structure {'times': [...]}
 
 import time
 import monetdblite
+import os
 
 
 class MonetDBliteDriver:
@@ -22,15 +23,16 @@ class MonetDBliteDriver:
         pass
 
     @staticmethod
-    def run(target, query):
+    def run(target):
         """
         The number of repetitions is used to derive the best-of value.
         :param target :
-        :param query :
         :return:
         """
         db = target['db']
         dbms = target['dbms']
+        query = target['query']
+        params = target['params']
         runlength = int(target['runlength'])
         timeout = int(target['timeout'])
         debug = target.getboolean('debug')
@@ -46,6 +48,11 @@ class MonetDBliteDriver:
                 conn.close()
                 print('Database connection closed.')
             return response
+        try:
+            preload = [ "%.3f" % v for v in list(os.getloadavg())]
+        except os.error:
+            preload = 0
+            pass
 
         if debug:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
@@ -73,5 +80,11 @@ class MonetDBliteDriver:
 
         if debug:
             print(response)
+        try:
+            postload = ["%.3f" % v for v in list(os.getloadavg())]
+        except os.error:
+            postload = 0
+            pass
+        response['cpuload'] = str(preload + postload).replace("'", "")
         conn.close()
         return response

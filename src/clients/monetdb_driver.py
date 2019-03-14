@@ -3,7 +3,7 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0.  If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Copyright 2018- MonetDB Solutions B.V.
+Copyright 2019- Stichting Sqalpel
 
 Author: M Kersten
 
@@ -17,6 +17,7 @@ import subprocess
 import shlex
 import time
 import pymonetdb
+import os
 
 
 class MonetDBDriver:
@@ -25,18 +26,23 @@ class MonetDBDriver:
         pass
 
     @staticmethod
-    def run(target, query):
+    def run(target):
         """
         The number of repetitions is used to derive the best-of value.
         :param target:
-        :param query:
         :return:
         """
         db = target['db']
+        query = target['query']
+        params = target['params']
         runlength = int(target['runlength'])
         debug = target.getboolean('trace')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
-
+        try:
+            preload = [ "%.3f" % v for v in list(os.getloadavg())]
+        except os.error:
+            preload = 0
+            pass
         conn = None
         try:
             conn = pymonetdb.connect(database=db)
@@ -70,6 +76,11 @@ class MonetDBDriver:
 
             response['times'].append(ticks)
             response['clock'].append(nu)
-
+        try:
+            postload = [ "%.3f" % v for v in list(os.getloadavg())]
+        except os.error:
+            postload = 0
+            pass
+        response['cpuload'] = str(preload + postload).replace("'", "")
         conn.close()
         return response

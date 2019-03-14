@@ -1,8 +1,7 @@
-# SQALPEL
+# SQULL
 
 ## Description
-SQALPEL is the collection of driver programs for performance experiments against a DBMS.
-For background information see the paper [Discrimative Performance Benchmarking](https://www.cwi.nl/~mk/scalpel.pdf).
+Squll.py is the driver program for performance experiments against a DBMS.
 
 ## Installation
 Setting up the environment involves a few simple steps.
@@ -15,10 +14,10 @@ If you do a user installation, you will need to add the right folder to your PAT
   export PATH="$PATH:$PYTHON_BIN_PATH"
   which pipenv
 ```
-Thereafter you can checkout the SQALPEL repository in a local directory.
+Thereafter you can checkout the Squll repository in a local directory.
 ```
-  git clone git@github.com:MonetDBSolutions/SQalpeL.git
-  cd SQalpeL
+  git clone git@github.com:sqalpel/squll.git
+  cd squll
   pipenv install --ignore-pipfile
   pipenv shell
 ```
@@ -28,16 +27,10 @@ The driver program reads a configuration file 'sqalpel.conf' from the directory 
 it is started. A sample is included for inspiration and documentation. Make sure that the
 global parameters are set correctly.
 
-SQALPEL is started with a target name, which corresponds to a section
-in the configuration file. That section may contain DBMS specific
-parameter settings.
+Squll is started with a section name in the configuration file. That section may contain DBMS specific
+parameter settings to establish a client connection.
 
-It can also be used to limit the queries acceptable for execution. 
-Either queries for a specific project are ran, or even specific experiments within a project.
-The most generous way is to accept any task, as indicated with
-the pseudo project '*' and pseudo experiment '*'.
-
-Once started, it continuously requests queries from the SQALPEL
+Once started, squll.py continuously requests queries from the Sqalpel
 server to contribute with execution times (in ms) of a number of runs.
 
 ## Policy
@@ -57,4 +50,4 @@ This Source Code is subject to the terms of the Mozilla Public
 License, v. 2.0.  If a copy of the MPL was not distributed with this
 repository, you can obtain one at http://mozilla.org/MPL/2.0/.
 
-&copy; 2018- MonetDB Solutions B.V.
+&copy; 2019- Stichting Sqalpel

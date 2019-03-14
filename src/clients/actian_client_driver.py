@@ -3,7 +3,7 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0.  If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Copyright 2018- CWI
+Copyright 2019- Stichting Sqalpel
 
 Author: M. Kersten, T Gubner
 
@@ -20,6 +20,7 @@ import shlex
 import time
 import tempfile
 import datetime
+import os
 
 class ActianClientDriver:
 
@@ -27,18 +28,24 @@ class ActianClientDriver:
         pass
 
     @staticmethod
-    def run(target, query):
+    def run(target):
         """
         The number of repetitions is used to derive the best-of value.
         :param target:
-        :param query:
         :return:
         """
         db = target['db']
+        query = target['query']
+        params = target['params']
         runlength = int(target['runlength'])
         timeout = int(target['timeout'])
         debug = False # target.getboolean('debug')
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
+        try:
+            preload = [ "%.3f" % v for v in list(os.getloadavg())]
+        except os.error:
+            preload = 0
+            pass
 
         action = 'sql "{database}"'
         action = target['command']
@@ -79,5 +86,10 @@ class ActianClientDriver:
                 response['cnt'].append(-1)  # not yet collected
                 response['extra'].append([])
                 response['clock'].append(nu)
-
+        try:
+            postload = [ "%.3f" % v for v in list(os.getloadavg())]
+        except os.error:
+            postload = 0
+            pass
+        response['cpuload'] = str(preload + postload).replace("'", "")
         return response

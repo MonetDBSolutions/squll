@@ -3,7 +3,7 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0.  If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Copyright 2018- MonetDB Solutions B.V.
+Copyright 2019- Stichting Sqalpel
 
 Author: M Kersten
 
@@ -18,6 +18,7 @@ import re
 import subprocess
 import shlex
 import time
+import os
 
 
 class MonetDBClientDriver:
@@ -30,7 +31,6 @@ class MonetDBClientDriver:
         """
         The number of repetitions is used to derive the best-of value.
         :param task:
-        :param query:
         :return:
         """
         db = task['db']
@@ -39,7 +39,11 @@ class MonetDBClientDriver:
         timeout = int(task['timeout'])
         debug = task['debug']
         response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
-
+        try:
+            preload = [ "%.3f" % v for v in list(os.getloadavg())]
+        except os.error:
+            preload = 0
+            pass
         action = 'mclient -d {database} -tperformance -ftrash -s "{query}"'
 
         z = action.format(query=query, database=db)
@@ -85,5 +89,10 @@ class MonetDBClientDriver:
             response['cnt'].append(-1)  # not yet collected
             response['extra'].append([ms,opt,sql])
             response['clock'].append(nu)
-
+        try:
+            postload = [ "%.3f" % v for v in list(os.getloadavg())]
+        except os.error:
+            postload = 0
+            pass
+        response['cpuload'] = str(preload + postload).replace("'", "")
         return response
