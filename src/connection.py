@@ -70,9 +70,8 @@ class Connection:
         if not task:
             print('No tasks available for the target section', json.dumps(args, sort_keys=True, indent=4))
         if debug:
-            print('Task received:', task)
-        if 'params' in task:
-            task['params'] = json.loads(task['params'])
+            print('Task received:', json.dumps(task, sort_keys=True, indent=4))
+
         task.update( {'timeout': self.timeout, 'debug': self.debug})
         return task
 
@@ -86,19 +85,19 @@ class Connection:
         u = { 'ticket': task['ticket'],
              'db': task['db'],  'dbms': task['dbms'],  'host': task['host'],
              'project': task['project'], 'experiment': task['experiment'], 'tag': task['tag'],
-             'cpucount': os.cpu_count(),
-             'ram': self.memory,
+             'cpus': os.cpu_count(),
+             'memory': self.memory,
              }
-        results.update(u)
+        u.update({'runs': results})
         response = ''
         try:
             if debug:
-                print('sending', json.dumps(results, sort_keys=True, indent=4))
-            response = requests.post(endpoint, json=results)
+                print('sending', json.dumps(u, sort_keys=True, indent=4))
+            response = requests.post(endpoint, json=u)
+            print('Sent task result', response)
             return response.status_code == 200
         except requests.exceptions.RequestException as e:
             print('REQUESTS exception', e)
             print('Failed to post to ', endpoint)
-        if debug:
-            print('Sent task result', response)
+        print('Sent task result', response)
         return False

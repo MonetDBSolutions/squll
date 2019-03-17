@@ -27,7 +27,7 @@ class MariaDBDriver:
         pass
 
     @staticmethod
-    def run(target, query):
+    def run(target):
         """
         The number of repetitions is used to derive the best-of value.
         :param target:
