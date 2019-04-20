@@ -7,9 +7,19 @@ Copyright 2019- Stichting Sqalpel
 
 Author: M Kersten
 
-Execute a single query multiple times on the database nicknamed 'dbms'
-and return a list of timings. The first error encountered stops the sequence.
-The result is a dictionary with at least the structure {'times': [...]}
+Execute a single query multiple times on the database nicknamed 'db'
+and return a list of timings. The first error encountered aborts the sequence.
+The result is a list of dictionaries
+run: [{
+    times: [<response time>]
+    chks: [<integer value to represent result (e.g. cnt,  checksum or hash over result set) >]
+    param: {param1:value1, ....}
+    errors: []
+    }]
+
+If parameter value lists are given, we run the query for each element in the product.
+
+Internal metrics, e.g. cpu load, is returned as a JSON structure in 'metrics' column
 """
 
 import time
@@ -18,68 +28,135 @@ import os
 
 
 class SqliteDriver:
+    conn = None
+    db = None
 
     def __init__(self):
         pass
 
     @staticmethod
-    def run(target):
+    def startserver(db):
+        if SQLiteDriver.conn:
+            # avoid duplicate connection
+            if SQLiteDriver.db == db:
+                return None
+            SQLiteDriver.stopserver()
+        print('Start SQLiteDriver', db)
+        try:
+            SQLiteDriver.conn = sqlite3.connect(database=db)
+        except (Exception, sqlite3.DatabaseError()) as msg:
+            print('EXCEPTION ', msg)
+            if SQLiteDriver.conn is not None:
+                SQLiteDriver.close()
+            return [{'error': json.dumps(msg), 'times': [], 'chks': [], 'param': []}]
+        return None
+
+    @staticmethod
+    def stopserver():
+        if not SQLiteDriver.conn:
+            return None
+        print('Stop SQLiteDriver')
+        # to be implemented
+        return None
+
+    @staticmethod
+    def run(task):
         """
         The SQLite database name is derived from the Scalpel database name with extension .db
-        :param target:
+        :param task:
         :return:
         """
-        db = target['db']
-        query = target['query']
-        params = target['params']
-        runlength = int(target['runlength'])
-        timeout = int(target['timeout'])
-        debug = target.getboolean('trace')
-        response = {'error': '', 'times': [], 'cnt': [], 'clock': []}
-        try:
-            preload = [ "%.3f" % v for v in list(os.getloadavg())]
-        except os.error:
-            preload = 0
-            pass
+        debug = task.getboolean('debug')
+        db = task['db']
+        query = task['query']
+        params = task['params']
+        options = json.loads(task['options'])
+        if 'runlength' in options:
+            runlength = int(options['runlength'])
+        else:
+            runlength = 1
+        print('runs', runlength)
 
-        conn = None
-        try:
-            conn = sqlite3.connect(target['dbfarm'] + db + '.db', timeout=timeout)
-        except sqlite3.DatabaseError as msg:
-            print('EXCEPTION ', msg)
-            print(target['dbfarm'] + db + '.db')
-            if conn is not None:
-                conn.close()
-                print('Database connection closed.')
-            return response
+        response = []
+        error = ''
+        msg = SQLiteDriver.startserver(db)
+        if msg:
+            SQLiteDriver.stopserver()
+            return msg
 
-        if debug:
-            nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
-            print('Run query:', nu, ':', query)
+        if params:
+            data = [json.loads(params[k]) for k in params.keys()]
+            names = [d for d in params.keys()]
+            gen = itertools.product(*data)
+        else:
+            gen = [[1]]
+            names = ['_ * _']
 
-        for i in range(runlength):
+        for z in gen:
+            if error != '':
+                break
+            if debug:
+                print('Run query:', time.strftime('%Y-%m-%d %H:%m:%S', time.localtime()))
+                print('Parameter:', z)
+                print(query)
+                
+            args = {}
+            for n, v in zip(names, z):
+                if params:
+                    args.update({n: v})
             try:
-                nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
-                c = conn.cursor()
-                ticks = time.time()
-                c.execute(query)
-                response['answer'] = 'No answer'
-                ticks = int((time.time() - ticks) * 1000)
-                print('ticks', ticks)
-                c.close()
-            except sqlite3.DatabaseError as msg:
-                print('EXCEPTION ', i, msg)
-                response['error'] = str(msg).replace("\n", " ").replace("'", "''")
-                conn.close()
-                return response
+                preload = [v for v in list(os.getloadavg())]
+            except os.error:
+                preload = 0
 
-            response['times'].append(ticks)
-            response['clock'].append(nu)
-        try:
-            postload = [ "%.3f" % v for v in list(os.getloadavg())]
-        except os.error:
-            postload = 0
-            pass
-        response['cpuload'] = str(preload + postload).replace("'", "")
-        conn.close()
+            times = []
+            chks = []
+            newquery = query
+            if z:
+                if debug:
+                    print('args:', args)
+                # replace the variables in the query
+                for elm in args.keys():
+                    newquery = re.sub(elm, str(args[elm]), newquery)
+                print('New query', newquery)
+
+            for i in range(runlength):
+                try:
+                    c = SQLite3.conn.cursor()
+
+                    ticks = time.time()
+                    c.execute(newquery)
+                    r = c.fetchone()
+                    if r:
+                        chks.append(int(r[0]))
+                    else:
+                        chks.append('')
+                    times.append(int((time.time() - ticks) * 1000))
+
+                    if debug:
+                        print('ticks[%s]' % i, times[-1])
+                    c.close()
+                except (Exception, sqlite3.DatabaseError) as msg:
+                    print('EXCEPTION ', msg)
+                    error = str(msg).replace("\n", " ").replace("'", "''")
+                    break
+                            
+            # wrapup the experimental runs,
+            # The load can be sent as something extra, it is an internal metric
+            try:
+                postload = [v for v in list(os.getloadavg())]
+            except os.error:
+                postload = 0
+
+            res = {'times': times,
+                   'chksum': chks,
+                   'param': args,
+                   'error': error,
+                   'metrics': {'load': preload + postload},
+                   }
+
+            response.append(res)
+        if debug:
+            print('Finished the run')
+        SQLiteDriver.stopserver()
         return response
