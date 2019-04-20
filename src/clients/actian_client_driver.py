@@ -7,11 +7,19 @@ Copyright 2019- Stichting Sqalpel
 
 Author: M. Kersten, T Gubner
 
-Execute a single query multiple times on the database nicknamed 'dbms'
-and return a list of timings. The first error encountered stops the sequence.
-The result is a dictionary with at least the structure {'times': [...]}
+Execute a single query multiple times on the database nicknamed 'db'
+and return a list of timings. The first error encountered aborts the sequence.
+The result is a list of dictionaries
+run: [{
+    times: [<response time>]
+    chks: [<integer value to represent result (e.g. cnt,  checksum or hash over result set) >]
+    param: {param1:value1, ....}
+    errors: []
+    }]
 
-Use the command line tool mclient to gather more details.
+If parameter value lists are given, we run the query for each element in the product.
+
+Internal metrics, e.g. cpu load, is returned as a JSON structure in 'metrics' column
 """
 
 import re
@@ -22,74 +30,156 @@ import tempfile
 import datetime
 import os
 
-class ActianClientDriver:
+
+class PostgresqlClientDriver:
+    conn = None
+    db = None
 
     def __init__(self):
         pass
 
     @staticmethod
-    def run(target):
+    def startserver(db):
+        if ActianDriver.conn:
+            # avoid duplicate connection
+            if ActianDriver.db == db:
+                return None
+            ActianDriver.stopserver()
+        print('Start ActianDriver', db)
+        try:
+            ActianDriver.conn = pymonetdb.connect(database=db)
+        except os.error as msg:
+            print('EXCEPTION ', msg)
+            if ActianDriver.conn is not None:
+                ActianDriver.close()
+            return [{'error': json.dumps(msg), 'times': [], 'chks': [], 'param': []}]
+        return None
+
+    @staticmethod
+    def stopserver():
+        if not ActianDriver.conn:
+            return None
+        print('Stop ActianDriver')
+        # to be implemented
+        return None
+
+    @staticmethod
+    def run(task):
         """
         The number of repetitions is used to derive the best-of value.
-        :param target:
+        :param task:
         :return:
         """
-        db = target['db']
-        query = target['query']
-        params = target['params']
-        runlength = int(target['runlength'])
-        timeout = int(target['timeout'])
-        debug = False # target.getboolean('debug')
-        response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra':[]}
-        try:
-            preload = [ "%.3f" % v for v in list(os.getloadavg())]
-        except os.error:
-            preload = 0
-            pass
+        debug = task.getboolean('debug')
+        db = task['db']
+        query = task['query']
+        params = task['params']
+        options = json.loads(task['options'])
+        if 'runlength' in options:
+            runlength = int(options['runlength'])
+        else:
+            runlength = 1
+        print('runs', runlength)
 
-        action = 'sql "{database}"'
-        action = target['command']
+        response = []
+        error = ''
+        msg = ActianDriver.startserver(db)
+        if msg:
+            ActianDriver.stopserver()
+            return msg
 
-        z = action.format(database=db)
-        args = shlex.split(z)
+        if params:
+            data = [json.loads(params[k]) for k in params.keys()]
+            names = [d for d in params.keys()]
+            gen = itertools.product(*data)
+        else:
+            gen = [[1]]
+            names = ['_ * _']
 
         # Retrieve output for post analysis
         out = subprocess.PIPE
         err = subprocess.STDOUT
+        for z in gen:
+            if error != '':
+                break
+            if debug:
+                print('Run query:', time.strftime('%Y-%m-%d %H:%m:%S', time.localtime()))
+                print('Parameter:', z)
+                print(query)
 
-        if debug:
-            nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
-            print('Run query:', nu, ':',  query)
+            args = {}
+            for n, v in zip(names, z):
+                if params:
+                    args.update({n: v})
+            try:
+                preload = [v for v in list(os.getloadavg())]
+            except os.error:
+                preload = 0
 
-        for i in range(runlength):
-            with tempfile.TemporaryFile() as queryfile:
-                queryfile.write(query.encode('utf-8'))
-                queryfile.write("\\g".encode('utf-8'))
-                queryfile.seek(0)
-
-                try:
-                    nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
-                    ms = datetime.datetime.now()
-                    proc = subprocess.run(args, timeout=timeout, check=True, stdin=queryfile, stdout=out, stderr=err)
-                    response['answer'] = 'No answer'
-                    ms = datetime.datetime.now() - ms
-                except subprocess.SubprocessError as msg:
-                    # a timeout should also stop the database process involved the hard way
-                    print('EXCEPTION ', i,  msg)
-                    response['error'] = str(msg).replace("\n", " ").replace("'", "''")
-                    return response
-
+            times = []
+            chks = []
+            newquery = query
+            if z:
                 if debug:
-                    print('response ', proc.stdout.decode('ascii')[:-1])
+                    print('args:', args)
+                # replace the variables in the query
+                for elm in args.keys():
+                    newquery = re.sub(elm, str(args[elm]), newquery)
+                print('New query', newquery)
+            newquery = newquery + ' limit 1'
+            if debug:
+                print('Run query:', nu, ':',  newquery)
 
-                response['times'].append(float(ms.microseconds) / 1000.0)
-                response['cnt'].append(-1)  # not yet collected
-                response['extra'].append([])
-                response['clock'].append(nu)
-        try:
-            postload = [ "%.3f" % v for v in list(os.getloadavg())]
-        except os.error:
-            postload = 0
-            pass
-        response['cpuload'] = str(preload + postload).replace("'", "")
+            #  action = 'sql "{database}"'
+            action = newquery
+
+            z = action.format(database=db)
+            args = shlex.split(z)
+
+            for i in range(runlength):
+                with tempfile.TemporaryFile() as queryfile:
+                    queryfile.write(query.encode('utf-8'))
+                    queryfile.write("\\g".encode('utf-8'))
+                    queryfile.seek(0)
+    
+                    try:
+                        ticks = time.time()
+                        proc = subprocess.run(args, timeout=timeout, check=True,
+                                              stdin=queryfile, stdout=out, stderr=err)
+                        r = proc.stdout.decode('ascii')[:-1]
+                        if debug:
+                            print('response ', r)
+                        if r:
+                            chks.append(int(r[0]))
+                        else:
+                            chks.append('')
+                        times.append(int((time.time() - ticks) * 1000))
+
+                        if debug:
+                            print('ticks[%s]' % i, times[-1])
+                        proc.close()
+                    except subprocess.SubprocessError as msg:
+                        # a timeout should also stop the database process involved the hard way
+                        print('EXCEPTION ', i,  msg)
+                        error = str(msg).replace("\n", " ").replace("'", "''")
+                        break
+
+            # wrapup the experimental runs,
+            # The load can be sent as something extra, it is an internal metric
+            try:
+                postload = [v for v in list(os.getloadavg())]
+            except os.error:
+                postload = 0
+
+            res = {'times': times,
+                   'chksum': chks,
+                   'param': args,
+                   'error': error,
+                   'metrics': {'load': preload + postload},
+                   }
+
+            response.append(res)
+        if debug:
+            print('Finished the run')
+        ActianDriver.stopserver()
         return response
