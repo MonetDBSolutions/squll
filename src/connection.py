@@ -47,10 +47,6 @@ class Connection:
         args = {'ticket': self.ticket}
         print('Ticket used', self.ticket)
 
-        if target.getboolean('extras'):
-            # also ask for the template and binding table
-            args.update({'extras': ['template', 'binding']})
-
         response = ''
         try:
             if debug:
@@ -69,6 +65,12 @@ class Connection:
         task = json.loads(response.content)
         if not task:
             print('No tasks available for the target section', json.dumps(args, sort_keys=True, indent=4))
+
+        if 'extras' in task:
+            print('extras', task['extras'])
+            e = json.loads(task['extras'])
+            task.update(e)
+
         if debug:
             print('Task received:', json.dumps(task, sort_keys=True, indent=4))
 
@@ -85,8 +87,6 @@ class Connection:
         u = { 'ticket': task['ticket'],
              'db': task['db'],  'dbms': task['dbms'],  'host': task['host'],
              'project': task['project'], 'experiment': task['experiment'], 'tag': task['tag'],
-             'cpus': os.cpu_count(),
-             'memory': self.memory,
              }
         u.update({'runs': results})
         response = ''

@@ -11,14 +11,15 @@ Execute a single query multiple times on the database nicknamed 'db'
 and return a list of timings. The first error encountered aborts the sequence.
 The result is a list of dictionaries
 run: [{
-    times: [<ticks>]
+    times: [<response time>]
     chks: [<integer value to represent result (e.g. cnt,  checksum or hash over result set) >]
     param: {param1:value1, ....}
-    load : [<os load>]
     errors: []
     }]
 
 If parameter value lists are given, we run the query for each element in the product.
+
+Internal metrics, e.g. cpu load, is returned as a JSON structure in 'metrics' column
 """
 
 import re
@@ -41,6 +42,7 @@ class MonetDBDriver:
     @staticmethod
     def startserver(db):
         if MonetDBDriver.conn:
+            # avoid duplicate connection
             if MonetDBDriver.db == db:
                 return None
             MonetDBDriver.stopserver()
@@ -59,6 +61,7 @@ class MonetDBDriver:
         if not MonetDBDriver.conn:
             return None
         print('Stop MonetDBDriver')
+        # to be implemented
         return None
 
     @staticmethod
@@ -67,11 +70,16 @@ class MonetDBDriver:
         :param task:
         :return:
         """
-        debug = task['debug']
+        debug = task.getboolean('debug')
         db = task['db']
         query = task['query']
         params = task['params']
-        runlength = int(task['runlength'])
+        options = json.loads(task['options'])
+        if 'runlength' in options:
+            runlength = int(options['runlength'])
+        else:
+            runlength = 1
+        print('runs', runlength)
 
         response = []
         error = ''
@@ -85,8 +93,8 @@ class MonetDBDriver:
             names = [d for d in params.keys()]
             gen = itertools.product(*data)
         else:
-            gen = []
-            names = []
+            gen = [[1]]
+            names = ['_ * _']
 
         for z in gen:
             if error != '':
@@ -95,11 +103,13 @@ class MonetDBDriver:
                 print('Run query:', time.strftime('%Y-%m-%d %H:%m:%S', time.localtime()))
                 print('Parameter:', z)
                 print(query)
+
             args = {}
             for n, v in zip(names, z):
-                args.update({n: v})
+                if params:
+                    args.update({n: v})
             try:
-                preload = ["%.3f" % v for v in list(os.getloadavg())]
+                preload = [ v for v in list(os.getloadavg())]
             except os.error:
                 preload = 0
 
@@ -107,7 +117,8 @@ class MonetDBDriver:
             chks = []
             newquery = query
             if z:
-                print('args:', args)
+                if debug:
+                    print('args:', args)
                 # replace the variables in the query
                 for elm in args.keys():
                     newquery = re.sub(elm, str(args[elm]), newquery)
@@ -129,23 +140,27 @@ class MonetDBDriver:
                     if debug:
                         print('ticks[%s]' % i, times[-1])
                     c.close()
-
                 except (Exception, pymonetdb.DatabaseError) as msg:
                     print('EXCEPTION ', msg)
                     error = str(msg).replace("\n", " ").replace("'", "''")
                     break
 
-            # wrapup the experimental runs
+            # wrapup the experimental runs,
+            # The load can be sent as something extra, it is an internal metric
             try:
-                postload = ["%.3f" % v for v in list(os.getloadavg())]
+                postload = [v for v in list(os.getloadavg())]
             except os.error:
                 postload = 0
+
             res = {'times': times,
-                   'chks': chks,
+                   'chksum': chks,
                    'param': args,
                    'error': error,
-                   'load': str(preload + postload).replace("'", "")}
-            response.append(res)
+                   'metrics': {'load': preload + postload},
+                   }
 
+            response.append(res)
+        if debug:
+            print('Finished the run')
         MonetDBDriver.stopserver()
         return response
