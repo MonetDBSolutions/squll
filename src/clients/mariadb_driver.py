@@ -31,6 +31,7 @@ import configparser
 import datetime
 import os
 
+
 class MariaDBDriver:
     conn = None
     db = None
@@ -64,10 +65,10 @@ class MariaDBDriver:
         return None
     
     @staticmethod
-    def run(targe):
+    def run(task):
         """
         The number of repetitions is used to derive the best-of value.
-        :param target:
+        :param task:
         :return:
         """
         debug = task.getboolean('debug')
@@ -126,7 +127,7 @@ class MariaDBDriver:
 
             for i in range(runlength):
                 try:
-                    c= MariaDBDriver.conn.cursor()
+                    c = MariaDBDriver.conn.cursor()
                     ticks = time.time()
                     c.execute(newquery)
                     r = c.fetchone()
