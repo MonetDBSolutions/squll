@@ -43,7 +43,7 @@ class SqliteDriver:
             SQLiteDriver.stopserver()
         print('Start SQLiteDriver', db)
         try:
-            SQLiteDriver.conn = sqlite3.connect(database=db)
+            SQLiteDriver.conn = sqlite3.connect(target['dbfarm'] + db + '.db', timeout=timeout)
         except (Exception, sqlite3.DatabaseError()) as msg:
             print('EXCEPTION ', msg)
             if SQLiteDriver.conn is not None:
