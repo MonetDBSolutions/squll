@@ -54,10 +54,10 @@ parser = argparse.ArgumentParser(
 
 
 parser.add_argument('--config', type=str, help='Configuration file to use', default='squll.yaml')
-parser.add_argument('--ticket', type=str, help='Ticket', default='public')
-parser.add_argument('--timeout', type=int, help='Timeout in seconds', default=0)
-parser.add_argument('--bailout', type=int, help='Stop after too many errors', default=0)
-parser.add_argument('--deamon', help='Run as deamon', action='store_false')
+parser.add_argument('--ticket', type=str, help='Ticket', default=None)
+parser.add_argument('--timeout', type=int, help='Timeout in seconds', default=None)
+parser.add_argument('--bailout', type=int, help='Stop after too many errors', default=None)
+parser.add_argument('--daemon', help='Run as daemon', action='store_true')
 parser.add_argument('--driver', type=str, help='Target driver', default=None)
 parser.add_argument('--get', help='Get task', action='store_true')
 parser.add_argument('--put', type=str, help='Put task response', default=None)
@@ -80,8 +80,14 @@ if __name__ == '__main__':
 
     if args.driver not in config['drivers']:
         print(f'Unknown driver:{args.driver}')
-        print('Known drivers ', [ n for n in config['drivers']])
+        print('Known drivers ', [n for n in config['drivers']])
         exit(0)
+
+    # sanity check on the configuration file
+    for c in ['server', 'ticket', 'bailout', 'debug', 'timeout', 'daemon']:
+        if c not in config:
+            print(f'Configuration key "{c}" not set in configuration file')
+            exit(-1)
 
     section = config['drivers'][args.driver]
 
@@ -90,38 +96,34 @@ if __name__ == '__main__':
         config['debug'] = args.debug
     if args.ticket:
         config['ticket'] = args.ticket
-    if args.deamon:
-        config['deamon'] = args.deamon
+    if args.daemon:
+        config['daemon'] = args.daemon
     if args.timeout:
         config['timeout'] = args.timeout
     if args.bailout:
         config['bailout'] = args.bailout
 
-    if args.debug :
-        print('DRIVER', section)
+    if args.debug:
+        print('SERVER', config['server'])
         print('TICKET', config['ticket'])
         print('TIMEOUT', config['timeout'])
-        print('DEAMON', config['deamon'])
+        print('BAILOUT', config['bailout'])
+        print('DAEMON', config['daemon'])
+        print('DRIVER', section)
 
-    # sanity check on the configuration file
-    for c in ['server', 'ticket', 'bailout', 'debug', 'timeout', ]:
-        if c not in config:
-            print('Configuration key "%s" not set in configuration file for section "%s"' % (c, section))
-            exit(-1)
-
-    # Connect to the sqalpel.io webserver to get a single task
+    # Connect to the sqalpel.io webserver
     conn = Connection(config)
 
     if args.put:
         print('Return a valid json string', args.put)
         exit(0)
     delay = 5
-    bailout = 0
+    bailout = config['bailout']
 
     while True:
         task = conn.get_work(section)
         if task is None:
-            print('Lost connection with Sqalpel.io server')
+            print('Lost connection with sqalpel.io server')
             break
 
         # If we don't get any work we either should stop or wait for it
@@ -184,9 +186,10 @@ if __name__ == '__main__':
             if bailout == 0:
                 print('Bail out after too many database errors')
                 break
-        if not conn.put_work(task, results, section.getboolean('debug')):
+        if not conn.put_work(task, results):
             print('Error encountered in sending result')
-            if not section.getboolean('daemon'):
+            if not config['daemon']:
                 break
 
-    print('Finished all the work')
+    if config['debug']:
+        print('Finished all the work')

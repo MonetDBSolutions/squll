@@ -70,7 +70,7 @@ class MonetDBDriver:
         :param task:
         :return:
         """
-        debug = task.getboolean('debug')
+        debug = task['debug']
         db = task['db']
         query = task['query']
         params = task['params']

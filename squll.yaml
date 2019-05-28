@@ -1,0 +1,61 @@
+# (c) 2019- SQALPEL
+# author: Martin Kersten
+# See squll.html documentation in sqalpel
+
+server : 'localhost:5000'
+ticket : 'public'
+timeout : 60
+debug : True
+daemon : False
+bailout : 0
+
+# The remainder is a starting point to address the specs of an individual DBMS
+drivers:
+  MonetDB:
+    dbfarm : "%{home}s/dbfarm"
+
+  SQLite:
+    dbfarm : "%(home)s/sqlite/"
+
+  PostgreSQL:
+    dbfarm : "%(home)s/data"
+
+  MariaDB:
+    dbfarm : "%(home)s/dbfarm-mariadb"
+    dbsocket: "%(home)s/.mariadb.socket"
+    command: "mysql --socket={socket} --database={database} -u root"
+    port : 51337
+
+  Actian:
+    command : "ql {database}"
+
+  Firebird:
+    dbfarm : "%(home)s/firebird/database.db"
+
+  Apache Derby:
+    dbfarm : /path/to/sf1
+    uri : jdbc:derby:{database};create=true;
+    jars : </path/to/>derby.jar
+
+  Apache Hive:
+    uri : jdbc:hive://localhost:10000/{database}
+    jars : </path/to>/hive.jar
+
+  H2:
+    dbfarm : </path/to/sf1>/path/to/sf10
+    uri : jdbc:h2:{database}
+    jars : /path/to/h2.jar
+
+  HSQLDB:
+    project : TPC_H
+    db : "%{path}s/wisconsin"
+    dbms : HSQLDB
+    experiment : 06,q01
+    version : 2.4.1
+    uri : jdbc:hsqldb:file:{database}
+    jars : "%{path}s/hsqldb.jar"
+
+  MonetDBLite-Java:
+    db : </path/to/sf1>/path/to/sf10
+    uri : jdbc:monetdb:embedded:{database}
+    jars : /path/to/monetdb-jdbc-new.jar,/path/to/monetdb-java-lite.jar

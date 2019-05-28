@@ -31,7 +31,7 @@ import datetime
 import os
 
 
-class PostgresqlClientDriver:
+class ActianClientDriver:
     conn = None
     db = None
 

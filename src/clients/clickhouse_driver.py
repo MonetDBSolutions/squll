@@ -7,9 +7,19 @@ Copyright 2019- Stichting Sqalpel
 
 Author: M Kersten
 
-Execute a single query multiple times on the database nicknamed 'dbms'
-and return a list of timings. The first error encountered stops the sequence.
-The result is a dictionary with at least the structure {'times': [...]}
+Execute a single query multiple times on the database nicknamed 'db'
+and return a list of timings. The first error encountered aborts the sequence.
+The result is a list of dictionaries
+run: [{
+    times: [<response time>]
+    chks: [<integer value to represent result (e.g. cnt,  checksum or hash over result set) >]
+    param: {param1:value1, ....}
+    errors: []
+    }]
+
+If parameter value lists are given, we run the query for each element in the product.
+
+Internal metrics, e.g. cpu load, is returned as a JSON structure in 'metrics' column
 """
 
 import re

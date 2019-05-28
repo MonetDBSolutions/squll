@@ -19,43 +19,43 @@ class Connection:
     # and some session based
     server = 'localhost:5000'
     ticket = None
+    timeout = None
+    debug = True
     memory = 0
 
-    def __init__(self, section,):
+    def __init__(self, config):
         """
         Contact the sql server and gather some basic information of the platform to identify the platform results.
-        :param newroot:
-        :param key:
+        :param config:
         :return:
         """
 
-        self.server = section['server']
-        self.ticket = section['ticket']
-        self.timeout = section['timeout']
-        self.debug = section.getboolean('debug')
+        self.server = config['server']
+        self.ticket = config['ticket']
+        self.timeout = config['timeout']
+        self.debug = config['debug']
         # construct password hash
         try:
             mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
             self.memory = mem_bytes / (1024. ** 3)
-        except:
+        except ValueError:
             pass
 
-    def get_work(self, target):
-        debug = target.getboolean('debug')
-
+    def get_work(self, config):
         endpoint = 'http://' + self.server + '/get_work'
         args = {'ticket': self.ticket}
-        print('Ticket used', self.ticket)
+        if self.debug:
+            print(f'Ticket used {self.ticket}')
 
         response = ''
         try:
-            if debug:
+            if self.debug:
                 print('Endpoint', endpoint)
                 print('Requesting', json.dumps(args, sort_keys=True, indent=4))
             response = requests.get(endpoint,  json=args, timeout=20)
         except requests.exceptions.RequestException as e:
             print('REQUESTS exception', e)
-            if debug:
+            if self.debug:
                 print('WEB SERVER RESPONSE ', response)
             return None
 
@@ -71,33 +71,36 @@ class Connection:
             e = json.loads(task['extras'])
             task.update(e)
 
-        if debug:
+        if self.debug:
             print('Task received:', json.dumps(task, sort_keys=True, indent=4))
-
-        task.update( {'timeout': self.timeout, 'debug': self.debug})
         return task
 
-    def put_work(self, task, results, debug):
+    def put_work(self, task, results):
         if results is None:
-            if debug:
+            if self.debug:
                 print('Missing result object')
             return None
 
         endpoint = 'http://' + self.server + '/put_work'
         u = { 'ticket': task['ticket'],
-             'db': task['db'],  'dbms': task['dbms'],  'host': task['host'],
-             'project': task['project'], 'experiment': task['experiment'], 'tag': task['tag'],
+              'db': task['db'],
+              'dbms': task['dbms'],
+              'host': task['host'],
+              'project': task['project'],
+              'experiment': task['experiment'],
+              'tag': task['tag'],
              }
         u.update({'runs': results})
         response = ''
         try:
-            if debug:
+            if self.debug:
                 print('sending', json.dumps(u, sort_keys=True, indent=4))
             response = requests.post(endpoint, json=u)
-            print('Sent task result', response)
+            if self.debug:
+                print(f'Sent task result{response}')
             return response.status_code == 200
         except requests.exceptions.RequestException as e:
-            print('REQUESTS exception', e)
-            print('Failed to post to ', endpoint)
-        print('Sent task result', response)
+            print(f'REQUESTS exception {e}')
+            print(f'Failed to post to {endpoint}')
+        print(f'Sent task result{response}')
         return False
