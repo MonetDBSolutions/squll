@@ -17,19 +17,19 @@ A number of pre-defined driver programs are included for inspiration.
 import argparse
 import time
 import yaml
+import logging
 
-
+from src.drivers.repository import Repository
 from connection import Connection
-import configparser
-from clients.monetdb_driver import MonetDBDriver
-# from .clients.monetdb_client_driver import MonetDBClientDriver
+from .drivers.monetdb import MonetDB
+# from .drivers.monetdb_client_driver import MonetDBClientDriver
 # from probe.monetdblite_driver import MonetDBliteDriver
-from clients.clickhouse_driver import ClickhouseDriver
-from clients.postgres_driver import PostgresDriver
-from clients.sqlite_driver import SqliteDriver
-from clients.actian_client_driver import ActianClientDriver
-from clients.mariadb_driver import MariaDBDriver
-from clients.firebird_driver import FirebirdDriver
+from .drivers.clickhouse_driver import ClickhouseDriver
+from .drivers.postgresql import Postgresql
+from .drivers.sqlite import Sqlite
+from .drivers.actian_client_driver import ActianClientDriver
+from .drivers.mariadb import MariaDB
+from .drivers.firebird_driver import FirebirdDriver
 from jdbc.jdbc_driver import JDBCDriver
 from jdbc.jdbc_implementations import ApacheDerbyJDBCDriver, ApacheHiveJDBCDriver, H2JDBCDriver, HSQLDBJDBCDriver, \
     MonetDBLiteJDBCDriver
@@ -60,15 +60,61 @@ parser.add_argument('--bailout', type=int, help='Stop after too many errors', de
 parser.add_argument('--daemon', help='Run as daemon', action='store_true')
 parser.add_argument('--driver', type=str, help='Target driver', default=None)
 parser.add_argument('--get', help='Get task', action='store_true')
-parser.add_argument('--put', type=str, help='Put task response', default=None)
+parser.add_argument('--repository', type=str, help='Project Git', default=None)
+parser.add_argument('--dbms', type=str, help='Default DBMS', default='MonetDB')
+parser.add_argument('--db', type=str, help='Default database', default='sf1')
+parser.add_argument('--host', type=str, help='Default host', default='private')
 parser.add_argument('--debug', help='Trace interaction', action='store_false')
 parser.add_argument('--version', help='Show version info', action='store_true')
+
+
+def runtask(task):
+    logging.info(f'run task {task}')
+    if task['dbms'].lower() == 'monetdb':
+        results = MonetDB.run(task)
+    elif task['dbms'].lower() == 'postgresql':
+        results = Postgresql.run(task)
+    elif task['dbms'].lower() == 'clickhouse':
+        results = ClickhouseDriver.run(task)
+    elif task['dbms'].lower() == 'sqlite':
+        results = Sqlite.run(task)
+    elif task['dbms'].lower() == 'actian':
+        results = ActianClientDriver.run(task)
+    elif task['dbms'].lower() == 'mariadb':
+        results = MariaDB.run(task)
+    elif task['dbms'].lower() == 'firebird':
+        results = FirebirdDriver.run(task)
+    elif task['dbms'].lower() in ('apache derby', 'derby'):
+        results = JDBCDriver.run(task, ApacheDerbyJDBCDriver(task))
+    elif task['dbms'].lower() in ('apache hive', 'hive'):
+        results = JDBCDriver.run(task, ApacheHiveJDBCDriver(task))
+    elif task['dbms'].lower() == 'h2':
+        results = JDBCDriver.run(task, H2JDBCDriver(task))
+    elif task['dbms'].lower() == 'hsqldb':
+        results = JDBCDriver.run(task, HSQLDBJDBCDriver(task))
+    elif task['dbms'].lower() == 'monetdblite-java':
+        results = JDBCDriver.run(task, MonetDBLiteJDBCDriver(task))
+    # elif args.dbms == 'MonetDBLite-Python'.lower():
+    #   results = MonetDBliteDriver.run(task, t['query'],)
+    else:
+        results = None
+        print('Undefined task platform', task['dbms'])
+    return results
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
     if args.version:
         print('squll version 0.5')
+
+    # The log information is gathered in a single file
+    LOGFILE = time.strftime("%H:%M", time.localtime())
+    logging.basicConfig(level=logging.INFO,
+                        # filename= f'logs/{LOGFILE}',
+                        # filemode='w',
+                        format='%(levelname)-7s %(asctime)s  %(message)s',
+                        datefmt='%H:%M:%S')
+
     config = None
     with open(args.config, 'r') as f:
         try:
@@ -104,19 +150,30 @@ if __name__ == '__main__':
         config['bailout'] = args.bailout
 
     if args.debug:
-        print('SERVER', config['server'])
-        print('TICKET', config['ticket'])
-        print('TIMEOUT', config['timeout'])
-        print('BAILOUT', config['bailout'])
-        print('DAEMON', config['daemon'])
-        print('DRIVER', section)
+        logging.info(f"SERVER {config['server']}")
+        logging.info(f"TICKET {config['ticket']}")
+        logging.info(f"TIMEOUT {config['timeout']}")
+        logging.info(f"BAILOUT {config['bailout']}")
+        logging.info(f"DAEMON {config['daemon']}")
+        logging.info(f"DRIVER {section}")
 
+    # process the queries in the repository
+    queries = None
+    if args.repository:
+        if args.debug:
+            print(f'process Git repository {args.repository}')
+        if Repository.isvalid(args.repository):
+            errors, queries = Repository.get_experiments(args.repository)
+            if args.debug:
+                print(f'ERRORS: {errors}')
+                print(f'QUERIES: {queries}')
+            # results = runbatch(queries)
+            exit(0)
+        else:
+            print(f'Invalid repository URL {args.repository}')
     # Connect to the sqalpel.io webserver
     conn = Connection(config)
 
-    if args.put:
-        print('Return a valid json string', args.put)
-        exit(0)
     delay = 5
     bailout = config['bailout']
 
@@ -150,35 +207,7 @@ if __name__ == '__main__':
             print(task)
             exit(0)
 
-        if task['dbms'].lower() == 'monetdb':
-            results = MonetDBDriver.run(task)
-        elif task['dbms'].lower() == 'postgresql':
-            results = PostgresDriver.run(task)
-        elif task['dbms'].lower() == 'clickhouse':
-            results = ClickhouseDriver.run(task)
-        elif task['dbms'].lower() == 'sqlite':
-            results = SqliteDriver.run(task)
-        elif task['dbms'].lower() == 'actian':
-            results = ActianClientDriver.run(task)
-        elif task['dbms'].lower() == 'mariadb':
-            results = MariaDBDriver.run(task)
-        elif task['dbms'].lower() == 'firebird':
-            results = FirebirdDriver.run(task)
-        elif task['dbms'].lower() in ('apache derby', 'derby'):
-            results = JDBCDriver.run(task, ApacheDerbyJDBCDriver(task))
-        elif task['dbms'].lower() in ('apache hive', 'hive'):
-            results = JDBCDriver.run(task, ApacheHiveJDBCDriver(task))
-        elif task['dbms'].lower() == 'h2':
-            results = JDBCDriver.run(task, H2JDBCDriver(task))
-        elif task['dbms'].lower() == 'hsqldb':
-            results = JDBCDriver.run(task, HSQLDBJDBCDriver(task))
-        elif task['dbms'].lower() == 'monetdblite-java':
-            results = JDBCDriver.run(task,  MonetDBLiteJDBCDriver(task))
-        # elif args.dbms == 'MonetDBLite-Python'.lower():
-        #   results = MonetDBliteDriver.run(task, t['query'],)
-        else:
-            results = None
-            print('Undefined task platform', task['dbms'])
+        results = runtask(task)
 
         print(results)
         if results and results[-1]['error'] != '':

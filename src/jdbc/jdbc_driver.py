@@ -38,7 +38,6 @@ class JDBCDriver:
         """
         db = target['db']
         query = target['query']
-        params = target['params']
         jdbc_uri = implementation.get_jdbc_uri().format(database=db)
         runlength = int(target['runlength'])
         debug = target.getboolean('trace')
@@ -82,7 +81,7 @@ class JDBCDriver:
             response['times'].append(ticks)
             response['clock'].append(nu)
         try:
-            postload = [ "%.3f" % v for v in list(os.getloadavg())]
+            postload = ["%.3f" % v for v in list(os.getloadavg())]
         except os.error:
             postload = 0
             pass

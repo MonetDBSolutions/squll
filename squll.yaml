@@ -1,9 +1,9 @@
 # (c) 2019- SQALPEL
 # author: Martin Kersten
 # See squll.html documentation in sqalpel
-
+version : june2019
 server : 'localhost:5000'
-ticket : 'public'
+ticket : local
 timeout : 60
 debug : True
 daemon : False

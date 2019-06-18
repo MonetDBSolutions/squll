@@ -7,19 +7,11 @@ Copyright 2019- Stichting Sqalpel
 
 Author: M Kersten
 
-Execute a single query multiple times on the database nicknamed 'db'
-and return a list of timings. The first error encountered aborts the sequence.
-The result is a list of dictionaries
-run: [{
-    times: [<response time>]
-    chks: [<integer value to represent result (e.g. cnt,  checksum or hash over result set) >]
-    param: {param1:value1, ....}
-    errors: []
-    }]
+Execute a single query multiple times on the database nicknamed 'dbms'
+and return a list of timings. The first error encountered stops the sequence.
+The result is a dictionary with at least the structure {'times': [...]}
 
-If parameter value lists are given, we run the query for each element in the product.
-
-Internal metrics, e.g. cpu load, is returned as a JSON structure in 'metrics' column
+Use the command line tool mclient to gather more details.
 """
 
 import re
@@ -29,32 +21,30 @@ import time
 import os
 
 
-class ClickhouseDriver:
+class MonetDBClientDriver:
 
     def __init__(self):
         pass
 
     @staticmethod
-    def run(target):
+    def run(task):
         """
         The number of repetitions is used to derive the best-of value.
-        :param target:
+        :param task:
         :return:
         """
-        db = target['db']
-        query = target['query']
-        params = target['params']
-        runlength = int(target['runlength'])
-        timeout = int(target['timeout'])
-        debug = target.getboolean('debug')
-        response = {'error': '', 'times': [], 'clock': []}
+        db = task['db']
+        query = task['query']
+        runlength = int(task['runlength'])
+        timeout = int(task['timeout'])
+        debug = task['debug']
+        response = {'error': '', 'times': [], 'cnt': [], 'clock': [], 'extra': []}
         try:
-            preload = [ "%.3f" % v for v in list(os.getloadavg())]
+            preload = ["%.3f" % v for v in list(os.getloadavg())]
         except os.error:
             preload = 0
             pass
-
-        action = 'clickhouse client --time --format=Null --query="{query}"',
+        action = 'mclient -d {database} -tperformance -ftrash -s "{query}"'
 
         z = action.format(query=query, database=db)
         args = shlex.split(z)
@@ -66,7 +56,7 @@ class ClickhouseDriver:
         query = ' '.join(args)
         if debug:
             nu = time.strftime('%Y-%m-%d %H:%m:%S', time.localtime())
-            print('Run query:', nu, ':', query)
+            print('Run query:', nu, ':',  query)
 
         for i in range(runlength):
             try:
@@ -74,7 +64,8 @@ class ClickhouseDriver:
                 proc = subprocess.run(args, timeout=timeout, check=True, stdout=out, stderr=err)
                 response['answer'] = 'No answer'
             except subprocess.SubprocessError as msg:
-                print('EXCEPTION ', i, msg)
+                # a timeout should also stop the database process involved the hard way
+                print('EXCEPTION ', i,  msg)
                 response['error'] = str(msg).replace("\n", " ").replace("'", "''")
                 return response
 
@@ -82,14 +73,21 @@ class ClickhouseDriver:
                 print('response ', proc.stdout.decode('ascii')[:-1])
 
             # for the build in drivers we can analyse the result directly for the response time
-            runtime = re.compile('(.*)(\d+\.\d+)(.*)')
-
+            runtime = re.compile('(.*run:)(\d+\.\d+)(.*)')
+            optimizer = re.compile('(.*opt:)(\d+\.\d+)(.*)')
+            sqlparse = re.compile('(.*sql:)(\d+\.\d+)(.*)')
             if runtime.match(str(proc.stdout)) is None:
                 # error detected
-                response['error'] = str(proc.stdout)
+                response['error'] = str(proc.stdout).replace("'", "''")
+                response['error'] = response['error'][response['error'].find('ERROR ') + 8:]
                 break
             ms = float(runtime.match(str(proc.stdout)).group(2))
-            response['times'].append(ms)
+            opt = float(optimizer.match(str(proc.stdout)).group(2))
+            sql = float(sqlparse.match(str(proc.stdout)).group(2))
+
+            response['times'].append(ms + opt + sql)
+            response['cnt'].append(-1)  # not yet collected
+            response['extra'].append([ms, opt, sql])
             response['clock'].append(nu)
         try:
             postload = ["%.3f" % v for v in list(os.getloadavg())]

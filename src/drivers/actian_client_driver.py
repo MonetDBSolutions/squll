@@ -5,21 +5,9 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 Copyright 2019- Stichting Sqalpel
 
-Author: M. Kersten
+Author: M. Kersten, T Gubner
 
-Execute a single query multiple times on the database nicknamed 'db'
-and return a list of timings. The first error encountered aborts the sequence.
-The result is a list of dictionaries
-run: [{
-    times: [<response time>]
-    chks: [<integer value to represent result (e.g. cnt,  checksum or hash over result set) >]
-    param: {param1:value1, ....}
-    errors: []
-    }]
-    
-If parameter value lists are given, we run the query for each element in the product.
-
-Internal metrics, e.g. cpu load, is returned as a JSON structure in 'metrics' column
+The prototypical driver to run a Sqalpel experiment and report on it.
 """
 
 import re
@@ -27,12 +15,11 @@ import subprocess
 import shlex
 import time
 import tempfile
-import configparser
 import datetime
 import os
 
 
-class MariaDBDriver:
+class ActianClientDriver:
     conn = None
     db = None
 
@@ -41,29 +28,29 @@ class MariaDBDriver:
 
     @staticmethod
     def startserver(db):
-        if MariadbDriver.conn:
+        if ActianDriver.conn:
             # avoid duplicate connection
-            if MariadbDriver.db == db:
+            if ActianDriver.db == db:
                 return None
-            MariadbDriver.stopserver()
-        print('Start MariadbDriver', db)
+            ActianDriver.stopserver()
+        print('Start ActianDriver', db)
         try:
-            MariadbDriver.conn = mysql.connector.connect(port=target['port'], database=db, user='root')
-        except (Exception, mysql.connector.DatabaseError) as msg:
+            ActianDriver.conn = pymonetdb.connect(database=db)
+        except os.error as msg:
             print('EXCEPTION ', msg)
-            if MariadbDriver.conn is not None:
-                MariadbDriver.close()
+            if ActianDriver.conn is not None:
+                ActianDriver.close()
             return [{'error': json.dumps(msg), 'times': [], 'chks': [], 'param': []}]
         return None
 
     @staticmethod
     def stopserver():
-        if not MariadbDriver.conn:
+        if not ActianDriver.conn:
             return None
-        print('Stop MariadbDriver')
+        print('Stop ActianDriver')
         # to be implemented
         return None
-    
+
     @staticmethod
     def run(task):
         """
@@ -84,9 +71,9 @@ class MariaDBDriver:
 
         response = []
         error = ''
-        msg = MariadbDriver.startserver(db)
+        msg = ActianDriver.startserver(db)
         if msg:
-            MariadbDriver.stopserver()
+            ActianDriver.stopserver()
             return msg
 
         if params:
@@ -97,6 +84,9 @@ class MariaDBDriver:
             gen = [[1]]
             names = ['_ * _']
 
+        # Retrieve output for post analysis
+        out = subprocess.PIPE
+        err = subprocess.STDOUT
         for z in gen:
             if error != '':
                 break
@@ -124,26 +114,43 @@ class MariaDBDriver:
                 for elm in args.keys():
                     newquery = re.sub(elm, str(args[elm]), newquery)
                 print('New query', newquery)
+            newquery = newquery + ' limit 1'
+            if debug:
+                print('Run query:', nu, ':',  newquery)
+
+            #  action = 'sql "{database}"'
+            action = newquery
+
+            z = action.format(database=db)
+            args = shlex.split(z)
 
             for i in range(runlength):
-                try:
-                    c = MariaDBDriver.conn.cursor()
-                    ticks = time.time()
-                    c.execute(newquery)
-                    r = c.fetchone()
-                    if r:
-                        chks.append(int(r[0]))
-                    else:
-                        chks.append('')
-                    times.append(int((time.time() - ticks) * 1000))
+                with tempfile.TemporaryFile() as queryfile:
+                    queryfile.write(query.encode('utf-8'))
+                    queryfile.write("\\g".encode('utf-8'))
+                    queryfile.seek(0)
+    
+                    try:
+                        ticks = time.time()
+                        proc = subprocess.run(args, timeout=timeout, check=True,
+                                              stdin=queryfile, stdout=out, stderr=err)
+                        r = proc.stdout.decode('ascii')[:-1]
+                        if debug:
+                            print('response ', r)
+                        if r:
+                            chks.append(int(r[0]))
+                        else:
+                            chks.append('')
+                        times.append(int((time.time() - ticks) * 1000))
 
-                    if debug:
-                        print('ticks[%s]' % i, times[-1])
-                    c.close()
-                except (Exception,  mysql.connector.DatabaseError) as msg:
-                    print('EXCEPTION ', msg)
-                    error = str(msg).replace("\n", " ").replace("'", "''")
-                    break
+                        if debug:
+                            print('ticks[%s]' % i, times[-1])
+                        proc.close()
+                    except subprocess.SubprocessError as msg:
+                        # a timeout should also stop the database process involved the hard way
+                        print('EXCEPTION ', i,  msg)
+                        error = str(msg).replace("\n", " ").replace("'", "''")
+                        break
 
             # wrapup the experimental runs,
             # The load can be sent as something extra, it is an internal metric
@@ -162,5 +169,5 @@ class MariaDBDriver:
             response.append(res)
         if debug:
             print('Finished the run')
-        MariadbDriver.stopserver()
+        ActianDriver.stopserver()
         return response

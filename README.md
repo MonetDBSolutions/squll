@@ -1,7 +1,7 @@
 # SQULL
 
 ## Description
-Squll.py is the driver program for performance experiments against a DBMS.
+Squll.py is a generic driver program for performance experiments against a DBMS.
 
 ## Installation
 Setting up the environment involves a few simple steps.
@@ -23,7 +23,7 @@ Thereafter you can checkout the Squll repository in a local directory.
 ```
 
 ## Usage
-The driver program reads a configuration file 'sqalpel.conf' from the directory in which
+The driver program reads a configuration file 'sqalpel.yaml' from the directory in which
 it is started. A sample is included for inspiration and documentation. Make sure that the
 global parameters are set correctly.
 
@@ -33,6 +33,11 @@ parameter settings to establish a client connection.
 Once started, squll.py continuously requests queries from the Sqalpel
 server to contribute with execution times (in ms) of a number of runs.
 
+## Drivers section
+This contains the core programs squll.py and the supportive files
+repository.py and sqalpel.py. The remainder are drivers
+for some well-knonw database. The may require additional arguments.
+
 ## Policy
 Recall that all experiments should be ran in good faith with
 the intentions provided by the project owner. In particular,
@@ -40,9 +45,11 @@ the parameter setting of the DBMS and OS should comply with
 those recorded for them in the SQALPEL website. The project
 owner can discard any suspicious result or decline contributions.
 
+## TODO
+The squll.py drivers should be upgraded. It is in flux.
 
 ## Credits
-sqalpel.py is orginally developed by Martin Kersten.
+squll.py is orginally developed by Martin Kersten.
 
 ## License
 
